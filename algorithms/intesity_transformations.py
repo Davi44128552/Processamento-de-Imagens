@@ -15,6 +15,7 @@ def thresholding(img_matrix: np.ndarray, T: int = 128) -> np.ndarray:
     # Returning the final matrix
     return final_matrix
 
+# Negative
 def negative(img_matrix: np.ndarray) -> np.ndarray:
 
     # Defining the value of L
@@ -27,7 +28,8 @@ def negative(img_matrix: np.ndarray) -> np.ndarray:
     # Returning the final matrix
     return final_matrix
 
-def logarithm_transformation(img_matrix: np.ndarray):
+# Logarithm
+def logarithm_transformation(img_matrix: np.ndarray) -> np.ndarray:
 
     # According to the book, the logarithm transformation is defined by c log (1 + r)
     # We define the constant c by the formula c = 255 / (log(1 + rmax))
@@ -40,6 +42,27 @@ def logarithm_transformation(img_matrix: np.ndarray):
 
     # Applying the formula to generate the new matrix
     final_matrix = c * np.log(1 + img_matrix.astype(float))
+
+    # Returning the final matrix
+    return final_matrix.astype(np.uint8)
+
+# Power-law (gamma)
+def power_law_transformation(img_matrix: np.ndarray, gamma: float = 1) -> np.ndarray:
+
+    # According to the book, the power-law (gamma) transformation is defined by c r^gamma
+
+    # Taking the rmax
+    rmax = float(np.max(img_matrix)) # Converting to float to avoid overflow errors
+
+    # If rmax = 0, we just return the input image
+    if (rmax == 0):
+        return img_matrix
+
+    # Calculating c value
+    c = 255 / (rmax ** gamma)
+
+    # Applying the formula
+    final_matrix = c * (img_matrix.astype(float) ** gamma)
 
     # Returning the final matrix
     return final_matrix.astype(np.uint8)
