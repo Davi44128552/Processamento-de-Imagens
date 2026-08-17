@@ -147,7 +147,45 @@ def bit_plane_slicing(img_matrix: np.ndarray, bit_reference: int) -> np.ndarray:
 
     # With mask image, we just take the non-zero values ​​and set the new value to 255.
     condition = (mask_image != 0)
-    final_image = np.where(condition, 255, 0)
+    final_matrix = np.where(condition, 255, 0)
 
     # Returning the final image
-    return final_image.astype(np.uint8)
+    return final_matrix.astype(np.uint8)
+
+# Steganography
+def steganography_apply(img_matrix: np.ndarray, message: str) -> np.ndarray:
+    
+    # Steganography involves converting a message into binary and adding it to the least significant bit (LSB) of the image
+
+    # Adding a terminator to the message (this will be important for decode)
+    message += '\x00'
+
+    # Converting the string message into binary
+    binary_list = []
+    for char in message:
+        ascii_code = ord(char)
+        binary_code = format(ascii_code, '08b')
+
+        for bit in binary_code:
+            binary_list.append(int(bit))
+
+    # Converting the matrix to 1D to facilitate the message addition process
+    img_oned = img_matrix.flatten()
+
+    # Checking if the message fits in the image
+    if (len(img_oned) < len(binary_list)):
+        print("Erro! A mensagem é muito grande para a imagem requisitada!")
+        return img_matrix
+
+    # Taking the first n pixels and changing them
+    pixels_changed = img_oned[0:len(binary_list)]
+    pixels_changed = (pixels_changed & 254) | np.array(binary_list)
+
+    # Changing the original bits to the new ones
+    img_oned[0:len(binary_list)] = pixels_changed
+
+    # Converting the matrix to 2D
+    final_matrix = img_oned.reshape(img_matrix.shape)
+
+    # Returning the result
+    return final_matrix.astype(np.uint8)
