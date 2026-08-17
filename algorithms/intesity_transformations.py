@@ -189,3 +189,34 @@ def steganography_apply(img_matrix: np.ndarray, message: str) -> np.ndarray:
 
     # Returning the result
     return final_matrix.astype(np.uint8)
+
+def steganography_decoder(img_matrix: np.ndarray) -> str:
+
+    # In this function, we will take the LSB from the image and try to find the message
+    message = ""
+
+    # Converting the matrix into 1D (again)
+    img_oned = img_matrix.flatten()
+
+    # Extracting the LSB from the image
+    matrix_lsb = img_oned & 1
+
+    # traversing the pixels of the image to obtain the message
+    for i in range(0, len(matrix_lsb), 8): # each pixel has 8 bits
+
+        # Converting the 8 bits into string
+        char_list = matrix_lsb[i:i+8]
+        char_string = "".join(char_list.astype(str))
+
+        # Converting the char into ascii code
+        ascii_char = int(char_string, 2)
+
+        # Checking if there's more hidden message or don't
+        if (ascii_char == 0): # if char = \x00, then we got the whole message
+            break
+
+        # Otherwise, we add the string to the message
+        message += chr(ascii_char)
+
+    # Returning the final message
+    return message
