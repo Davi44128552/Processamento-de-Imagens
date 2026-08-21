@@ -3,7 +3,7 @@ import numpy as np
 
 # Implementing intesity transfomation functions
 # Thresholding
-def thresholding(img_matrix: np.ndarray, T: int = 128) -> np.ndarray:
+def thresholding(img_matrix: np.ndarray, T: int) -> np.ndarray:
 
     # Checking if T is NOT between 0 and 255
     if (not(0 <= T <= 255)):
@@ -18,11 +18,12 @@ def thresholding(img_matrix: np.ndarray, T: int = 128) -> np.ndarray:
     return final_matrix
 
 # Negative
-def negative(img_matrix: np.ndarray) -> np.ndarray:
+def negative(img_matrix: np.ndarray, L = None) -> np.ndarray:
 
     # Defining the value of L
     # L is defined by the image's bit depth and the formula is 2^k where k is the bit depth
-    L = 2 ** (img_matrix.itemsize * 8) # if uint8, itemsize = 1; if uint16, itemsize = ; ...
+    if L is None:
+        L = 2 ** (img_matrix.itemsize * 8) # if uint8, itemsize = 1; if uint16, itemsize = ; ...
 
     # Applying the formula given by the book
     final_matrix = L - 1 - img_matrix
@@ -31,7 +32,7 @@ def negative(img_matrix: np.ndarray) -> np.ndarray:
     return final_matrix
 
 # Logarithm
-def logarithm_transformation(img_matrix: np.ndarray) -> np.ndarray:
+def logarithm_transformation(img_matrix: np.ndarray, c = None) -> np.ndarray:
 
     # According to the book, the logarithm transformation is defined by c log (1 + r)
     # We define the constant c by the formula c = 255 / (log(1 + rmax))
@@ -40,7 +41,8 @@ def logarithm_transformation(img_matrix: np.ndarray) -> np.ndarray:
     rmax = float(np.max(img_matrix)) # Converting to float to avoid overflow errors
 
     # Calculating c value
-    c = 255 / (np.log(1 + rmax))
+    if (c is None):
+        c = 255 / (np.log(1 + rmax))
 
     # Applying the formula to generate the new matrix
     final_matrix = c * np.log(1 + img_matrix.astype(float))

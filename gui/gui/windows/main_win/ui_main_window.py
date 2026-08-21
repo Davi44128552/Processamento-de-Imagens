@@ -1,3 +1,6 @@
+# Importing os
+import os
+
 # Importing modules
 from qt_core import *
 
@@ -6,6 +9,16 @@ from gui.pages.ui_pages import Ui_StackedWidget
 
 # Importing widgets
 from gui.widgets.py_push_button import PyPushButton
+
+# Importing dialogs
+import gui.dialogs.dialog_one_input as one_input
+import gui.dialogs.message_dialog as response
+import gui.dialogs.dialog_three_input as three_input
+
+# Path to select images
+app_path = os.path.abspath(os.getcwd())
+folder = "gui/images/"
+path = os.path.join(app_path, folder)
 
 # Main window
 class UI_MainWindow(object):
@@ -89,6 +102,47 @@ class UI_MainWindow(object):
         self.left_menu_layout.addWidget(self.left_menu_bottom_frame)
         self.left_menu_layout.addWidget(self.left_menu_version)
 
+        # Adding the transformations frame
+        self.transformation_menu = QFrame()
+        self.transformation_menu.setStyleSheet("background-color: #44475a")
+        self.transformation_menu.setMaximumWidth(50)
+        self.transformation_menu.setMinimumWidth(50)
+
+        # Left menu layout
+        self.transformation_menu_layout = QVBoxLayout(self.transformation_menu)
+        self.transformation_menu_layout.setContentsMargins(0, 0, 0, 0)
+        self.transformation_menu_layout.setSpacing(0)
+
+        # Configuring the buttons
+        self.toggle2_button = PyPushButton(text = "Menu", icon_path = "icon_menu.svg")
+        self.button_thresholding = PyPushButton(text = "Linearização", icon_path = "icon1.svg")
+        self.button_negative = PyPushButton(text = "Negativa", icon_path = "icon2.svg")
+        self.button_logarithm_transformation = PyPushButton(text = "Transformação Logarítmica", icon_path = "icon3.svg")
+        self.button_power_law = PyPushButton(text = "Transformação gamma", icon_path = "icon4.svg")
+        self.button_contrast_stretching = PyPushButton(text = "Alongamento de contraste", icon_path = "icon5.svg")
+        self.button_intensity_level_slicing = PyPushButton(text = "Fatiamento por intensidade", icon_path = "icon7.svg")
+        self.button_bit_plane_slicing = PyPushButton(text = "Fatiamento por planos de bits", icon_path = "icon6.svg")
+        self.button_steganography_apply = PyPushButton(text = "Aplicar Esteganografia", icon_path = "icon8.svg")
+        self.button_steganography_undo = PyPushButton(text = "Decodificar Esteganografia", icon_path = "icon9.svg")
+        self.transformation_download_button = PyPushButton(text = "Baixar Imagem", icon_path = "download.svg")        
+        self.button_transformation_go_back = PyPushButton(text = "Voltar", icon_path = "arrow.svg")
+
+        # Adding the buttons to layout
+        self.transformation_menu_layout.addWidget(self.toggle2_button)
+        self.transformation_menu_layout.addWidget(self.button_thresholding)
+        self.transformation_menu_layout.addWidget(self.button_negative)
+        self.transformation_menu_layout.addWidget(self.button_logarithm_transformation)
+        self.transformation_menu_layout.addWidget(self.button_power_law)
+        self.transformation_menu_layout.addWidget(self.button_contrast_stretching)
+        self.transformation_menu_layout.addWidget(self.button_intensity_level_slicing)
+        self.transformation_menu_layout.addWidget(self.button_bit_plane_slicing)
+        self.transformation_menu_layout.addWidget(self.button_steganography_apply)
+        self.transformation_menu_layout.addWidget(self.button_steganography_undo)
+        self.transformation_menu_layout.addWidget(self.transformation_download_button)
+        self.transformation_menu_layout.addWidget(self.button_transformation_go_back)
+
+        self.transformation_menu.hide()
+
         # Content
         self.content = QFrame()
         self.content.setStyleSheet("background-color: #282a36")
@@ -159,4 +213,65 @@ class UI_MainWindow(object):
         self.main_layout.addWidget(self.left_menu)
         self.main_layout.addWidget(self.content)
 
+        # Configuring the dialog box
+        self.thresholding_window = QDialog()
+        self.thresholding_window_ui = one_input.Ui_Dialog()
+        self.thresholding_window_ui.setupUi(self.thresholding_window)
+        self.thresholding_window.setStyleSheet("background-color: #44475a; font: 700 11pt 'Segoe UI'; color: white")
+        self.thresholding_window.setWindowIcon(QPixmap(os.path.normpath(os.path.join(path, "icon1.svg"))))
+        self.thresholding_window.setWindowTitle("Limiarização")
+
+        self.negative_window = QDialog()
+        self.negative_window_ui = one_input.Ui_Dialog()
+        self.negative_window_ui.setupUi(self.negative_window)
+        self.negative_window_ui.retranslateUi(self.negative_window, "Escreva um valor para L", "")
+        self.negative_window.setStyleSheet("background-color: #44475a; font: 700 11pt 'Segoe UI'; color: white")
+        self.negative_window.setWindowIcon(QPixmap(os.path.normpath(os.path.join(path, "icon2.svg"))))
+        self.negative_window.setWindowTitle("Negativa")
+
+        self.logarithm_transformation_window = QDialog()
+        self.logarithm_transformation_window_ui = one_input.Ui_Dialog()
+        self.logarithm_transformation_window_ui.setupUi(self.logarithm_transformation_window)
+        self.logarithm_transformation_window_ui.retranslateUi(self.logarithm_transformation_window, "Escreva um valor para c", "")
+        self.logarithm_transformation_window.setStyleSheet("background-color: #44475a; font: 700 11pt 'Segoe UI'; color: white")
+        self.logarithm_transformation_window.setWindowIcon(QPixmap(os.path.normpath(os.path.join(path, "icon3.svg"))))
+        self.logarithm_transformation_window.setWindowTitle("Transformação logarítmica")
+
+        self.power_law_window = QDialog()
+        self.power_law_window_ui = one_input.Ui_Dialog()
+        self.power_law_window_ui.setupUi(self.power_law_window)
+        self.power_law_window_ui.retranslateUi(self.power_law_window, "Escreva um valor para gamma", "1")
+        self.power_law_window.setStyleSheet("background-color: #44475a; font: 700 11pt 'Segoe UI'; color: white")
+        self.power_law_window.setWindowIcon(QPixmap(os.path.normpath(os.path.join(path, "icon4.svg"))))
+        self.power_law_window.setWindowTitle("Transformação Gamma")
+
+        self.intensity_level_slicing_window = QDialog()
+        self.intensity_level_slicing_window_ui = three_input.Ui_Dialog()
+        self.intensity_level_slicing_window_ui.setupUi(self.intensity_level_slicing_window)
+        self.intensity_level_slicing_window.setStyleSheet("background-color: #44475a; font: 700 10pt 'Segoe UI'; color: white")
+        self.intensity_level_slicing_window.setWindowIcon(QPixmap(os.path.normpath(os.path.join(path, "icon7.svg"))))
+        self.intensity_level_slicing_window.setWindowTitle("Transformação por nível de intensidade")
+
+        self.bit_plane_slicing_window = QDialog()
+        self.bit_plane_slicing_window_ui = one_input.Ui_Dialog()
+        self.bit_plane_slicing_window_ui.setupUi(self.bit_plane_slicing_window)
+        self.bit_plane_slicing_window_ui.retranslateUi(self.bit_plane_slicing_window, "Escreva um plano de bit de referência (entre 0 e 7)", "")
+        self.bit_plane_slicing_window.setStyleSheet("background-color: #44475a; font: 700 11pt 'Segoe UI'; color: white")
+        self.bit_plane_slicing_window.setWindowIcon(QPixmap(os.path.normpath(os.path.join(path, "icon6.svg"))))
+        self.bit_plane_slicing_window.setWindowTitle("Transformação por planos de bits")
+
+        self.steganopgraphy_apply_window = QDialog()
+        self.steganopgraphy_apply_window_ui = one_input.Ui_Dialog()
+        self.steganopgraphy_apply_window_ui.setupUi(self.steganopgraphy_apply_window)
+        self.steganopgraphy_apply_window_ui.retranslateUi(self.steganopgraphy_apply_window, "Escreva uma mensagem qualquer", "")
+        self.steganopgraphy_apply_window.setStyleSheet("background-color: #44475a; font: 700 11pt 'Segoe UI'; color: white")
+        self.steganopgraphy_apply_window.setWindowIcon(QPixmap(os.path.normpath(os.path.join(path, "icon8.svg"))))
+        self.steganopgraphy_apply_window.setWindowTitle("Aplicar Esteganografia")
+
+        self.steganography_decode_window = QDialog()
+        self.steganography_decode_window_ui = response.Ui_Dialog()
+        self.steganography_decode_window_ui.setupUi(self.steganography_decode_window)
+        self.steganography_decode_window.setStyleSheet("background-color: #44475a; font: 700 11pt 'Segoe UI'; color: white")
+        self.steganography_decode_window.setWindowIcon(QPixmap(os.path.normpath(os.path.join(path, "icon9.svg"))))
+        self.steganography_decode_window.setWindowTitle("Esteganografia decodificada")
         parent.setCentralWidget(self.central_frame)
