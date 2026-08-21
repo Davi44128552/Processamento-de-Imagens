@@ -4,7 +4,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from PIL import Image
 import numpy as np
-from algorithms import intesity_transformations as it
+from algorithms import intensity_transformations as it
 
 # Lendo a imagem e a convertendo para matriz de cores
 image = Image.open("test_images/calopsita.jpg")
