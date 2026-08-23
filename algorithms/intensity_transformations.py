@@ -31,6 +31,16 @@ def negative(img_matrix: np.ndarray, L = None) -> np.ndarray:
     # Returning the final matrix
     return final_matrix
 
+# Brightness
+def brightness(img_matrix: np.ndarray, k: float = 1) -> np.ndarray:
+
+    # Just mutiply the matrix by the constant k
+    # Adding 0 and 255 to avoid overflow errors
+    final_matrix = np.clip(img_matrix * k, 0, 255)
+
+    # Returning the final matrix
+    return final_matrix.astype(np.uint8)
+
 # Logarithm
 def logarithm_transformation(img_matrix: np.ndarray, c = None) -> np.ndarray:
 

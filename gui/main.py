@@ -41,6 +41,7 @@ class MainWindow(QMainWindow):
         self.ui.toggle2_button.clicked.connect(lambda: self.toggle_button(self.ui.transformation_menu))
         self.ui.button_thresholding.clicked.connect(self.open_thresholding)
         self.ui.button_negative.clicked.connect(self.open_negative)
+        self.ui.button_brightness.clicked.connect(self.open_brightness)
         self.ui.button_logarithm_transformation.clicked.connect(self.open_logarithm)
         self.ui.button_power_law.clicked.connect(self.open_power_law)
         self.ui.button_contrast_stretching.clicked.connect(self.open_contrast_stretching)
@@ -59,7 +60,7 @@ class MainWindow(QMainWindow):
         self.ui.toggle_button3.clicked.connect(self.random_image_select)
         self.ui.config_button.clicked.connect(self.help)
 
-        self.button_list = [self.ui.button_thresholding, self.ui.button_negative, self.ui.button_logarithm_transformation, self.ui.button_power_law,
+        self.button_list = [self.ui.button_thresholding, self.ui.button_negative, self.ui.button_brightness, self.ui.button_logarithm_transformation, self.ui.button_power_law,
                                        self.ui.button_contrast_stretching, self.ui.button_intensity_level_slicing, self.ui.button_bit_plane_slicing,
                                        self.ui.button_steganography_apply, self.ui.button_steganography_undo, self.ui.config_button, self.ui.toggle_button, self.ui.toggle_button2, 
                                        self.ui.toggle_button3]
@@ -218,6 +219,25 @@ class MainWindow(QMainWindow):
                     return
                 converted_matrix = negative(self.matrix)
                 self.apply_transformation(converted_matrix)
+
+    # Brightness
+    def open_brightness(self):
+
+        self.active_button(self.ui.button_brightness)
+
+        # Executing the brightness window
+        if (self.ui.brightness_window.exec()):
+
+            # Taking the value
+            k = self.ui.brightness_window_ui.lineEdit.text()
+
+            try:
+                k = float(k)
+                converted_matrix = brightness(self.matrix, k)
+                self.apply_transformation(converted_matrix)
+            except ValueError:
+                print("O valor deve ser um número!")
+                return 
 
     # Logarithm
     def open_logarithm(self):
