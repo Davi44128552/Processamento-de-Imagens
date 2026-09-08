@@ -37,7 +37,7 @@ def convolution(img_matrix: np.ndarray, filter: np.ndarray) -> np.ndarray:
     return final_matrix.astype(np.uint8)
 
 # Mean filter
-def mean_filter(img_matrix: np.ndarray, dimension: int):
+def mean_filter(img_matrix: np.ndarray, dimension: int) -> np.ndarray:
 
     # Checking if the dimension is valid
     if (dimension % 2 == 0):
@@ -73,7 +73,7 @@ def mean_filter(img_matrix: np.ndarray, dimension: int):
     return final_matrix.astype(np.uint8)
 
 # Gaussian Smoothing
-def gaussian_smoothing(img_matrix: np.ndarray, dimension: int, standard_deviation: float):
+def gaussian_smoothing(img_matrix: np.ndarray, dimension: int, standard_deviation: float) -> np.ndarray:
 
     # Checking if the dimension is valid
     if (dimension % 2 == 0):
@@ -122,6 +122,43 @@ def gaussian_smoothing(img_matrix: np.ndarray, dimension: int, standard_deviatio
             filtered_values = operation_matrix * gauss_filter
             result = np.sum(filtered_values)
             final_matrix[i][j] = result
+
+    # Returning the final matrix
+    final_matrix = np.clip(final_matrix, 0, 255)
+    return final_matrix.astype(np.uint8)
+
+# Median filter
+def median_filter(img_matrix: np.ndarray, dimension: int) -> np.ndarray:
+
+    # Checking if the dimension is valid
+    if (dimension % 2 == 0):
+        print("O valor das dimensões da máscara deve ser ímpar!")
+        return img_matrix
+
+    # Taking the median position
+    median_position = (dimension * dimension) // 2
+
+    # Creating the new matrix wit padding
+    new_rows = (dimension - 1) // 2
+    new_columns = (dimension - 1) // 2
+    new_matrix = np.pad(img_matrix, ((new_rows, new_rows), (new_columns, new_columns)), mode = 'edge')
+
+    # Applying the kernel in the image
+    final_matrix = np.zeros((img_matrix.shape[0], img_matrix.shape[1]))
+
+    for i in range(0, final_matrix.shape[0]):
+        for j in range(0, final_matrix.shape[1]):
+
+            # Taking the submatrix to apply the filter
+            operation_matrix = new_matrix[i : i + dimension, j : j + dimension]
+
+            # Taking the median
+            ordered_operation_matrix = operation_matrix.flatten()
+            ordered_operation_matrix = np.sort(ordered_operation_matrix)
+            median = ordered_operation_matrix[median_position]
+
+            # Applying the operation
+            final_matrix[i][j] = median
 
     # Returning the final matrix
     final_matrix = np.clip(final_matrix, 0, 255)
