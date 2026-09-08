@@ -4,7 +4,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from PIL import Image
 import numpy as np
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 from algorithms import intensity_transformations as it
 from algorithms import histogram as hist
 from algorithms.spatial_filtering import *
@@ -23,10 +23,10 @@ matriz_cores = np.array(image)
 # matriz_cores9 = it.bit_plane_slicing(matriz_cores, 6)
 # matriz_cores10 = it.steganography_apply(matriz_cores, "Teste")
 # matriz_cores11 = hist.histogram_equalization(matriz_cores)
-matriz_cores12 = convolution(matriz_cores, np.array([[-2, -1,  0],
-                           [-1,  1,  1],
-                           [ 0,  1,  2]], dtype=np.float32))
-
+# matriz_cores12 = convolution(matriz_cores, np.array([[-2, -1,  0],
+#                           [-1,  1,  1],
+#                           [ 0,  1,  2]], dtype=np.float32))
+matriz_cores13 = mean_filter(matriz_cores, 55)
 # matriz_cores2 = matriz_cores2.astype(np.uint8)
 # matriz_cores3 = matriz_cores3.astype(np.uint8)
 # matriz_cores4 = matriz_cores4.astype(np.uint8) 
@@ -49,7 +49,8 @@ matriz_cores12 = convolution(matriz_cores, np.array([[-2, -1,  0],
 # image9 = Image.fromarray(matriz_cores9)
 # image10 = Image.fromarray(matriz_cores10)
 # image11 = Image.fromarray(matriz_cores11)
-image12 = Image.fromarray(matriz_cores12)
+# image12 = Image.fromarray(matriz_cores12)
+image13 = Image.fromarray(matriz_cores13)
 # Mostrando o resultado
 # image.show()
 # image2.show()
@@ -60,6 +61,7 @@ image12 = Image.fromarray(matriz_cores12)
 # image7.show()
 # image8.show()
 # image11.show()
-image12.save("test_images/resultado12.bmp")
+# image12.save("test_images/resultado12.bmp")
+image13.save("test_images/resultado13.bmp")
 # image10.save("test_images/imagem10.bmp")
 # print(it.steganography_decoder(matriz_cores10))
