@@ -59,6 +59,7 @@ class MainWindow(QMainWindow):
         self.ui.toggle_button2.clicked.connect(self.open_image)
         self.ui.toggle_button3.clicked.connect(self.random_image_select)
         self.ui.config_button.clicked.connect(self.help)
+        self.ui.select_part_window_ui.pushButton.clicked.connect(self.ui.select_part_window.accept)
 
         self.button_list = [self.ui.button_thresholding, self.ui.button_negative, self.ui.button_brightness, self.ui.button_logarithm_transformation, self.ui.button_power_law,
                                        self.ui.button_contrast_stretching, self.ui.button_intensity_level_slicing, self.ui.button_bit_plane_slicing,
@@ -122,8 +123,7 @@ class MainWindow(QMainWindow):
             self.ui.ui_pages.label_2.setPixmap(load_image)
             self.ui.pages.setCurrentWidget(self.ui.ui_pages.page2)
 
-            # Going to transformation function
-            self.transformation(file_path)
+            self.select_algorithms(file_path)
 
     # Adding the button function to take a random image
     def random_image_select(self):
@@ -145,8 +145,6 @@ class MainWindow(QMainWindow):
             self.ui.pages.setCurrentWidget(self.ui.ui_pages.page3)
 
             # Going to transformation function
-            self.transformation(self.ui.ui_pages.label, image_path)
-
     # Function to save the images
     def save_image(self):
 
@@ -177,6 +175,23 @@ class MainWindow(QMainWindow):
                 button.set_active(True)
             else:
                 button.set_active(False)
+
+    # Window to choose the algorithms type
+    def select_algorithms(self, file_path):
+
+        if (self.ui.select_part_window.exec()):
+
+            # Checking which radiobutton was selected
+            if (self.ui.select_part_window_ui.radioButton.isChecked()):
+
+                # Going to intensity transformations "window"
+                self.transformation(file_path)
+
+            elif (self.ui.select_part_window_ui.radioButton_2.isChecked()):
+                print("2")
+
+            elif (self.ui.select_part_window_ui.radioButton_3.isChecked()):
+                print("3")
 
     # applying the transformations
     # thresholding
