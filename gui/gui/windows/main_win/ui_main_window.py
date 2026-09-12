@@ -14,6 +14,8 @@ from gui.widgets.py_push_button import PyPushButton
 import gui.dialogs.dialog_one_input as one_input
 import gui.dialogs.message_dialog as response
 import gui.dialogs.dialog_three_input as three_input
+import gui.dialogs.message_dialog as message_dialog
+import gui.dialogs.dialog_method_select as dialog_method_select
 
 # Path to select images
 app_path = os.path.abspath(os.getcwd())
@@ -214,6 +216,14 @@ class UI_MainWindow(object):
         # Add widgets to app
         self.main_layout.addWidget(self.left_menu)
         self.main_layout.addWidget(self.content)
+
+        # Configuring the chapter dialog box
+        self.select_part_window = QDialog()
+        self.select_part_window_ui = dialog_method_select.Ui_Dialog()
+        self.select_part_window_ui.setupUi(self.select_part_window)
+        self.select_part_window.setStyleSheet("background-color: #44475a; font: 700 11pt 'Segoe UI'; color: white")
+        self.select_part_window.setWindowIcon(QPixmap(os.path.normpath(os.path.join(path, "calopsita_appimage.png"))))
+        self.select_part_window.setWindowTitle("Seleção de algoritmos")
 
         # Configuring the dialog box
         self.thresholding_window = QDialog()
