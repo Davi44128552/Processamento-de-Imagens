@@ -11,7 +11,7 @@ class Ui_Dialog(object):
         self.radioButton.setChecked(True)
         self.radioButton_2 = QRadioButton(Dialog)
         self.radioButton_2.setObjectName(u"radioButton_2")
-        self.radioButton_2.setGeometry(QRect(20, 70, 150, 20))
+        self.radioButton_2.setGeometry(QRect(20, 70, 250, 20))
         self.radioButton_3 = QRadioButton(Dialog)
         self.radioButton_3.setObjectName(u"radioButton_3")
         self.radioButton_3.setGeometry(QRect(20, 110, 171, 20))
@@ -27,7 +27,7 @@ class Ui_Dialog(object):
     def retranslateUi(self, Dialog):
         Dialog.setWindowTitle(QCoreApplication.translate("Dialog", u"Dialog", None))
         self.radioButton.setText(QCoreApplication.translate("Dialog", u"Transforma\u00e7\u00f5es de intensidade", None))
-        self.radioButton_2.setText(QCoreApplication.translate("Dialog", u"Histograma", None))
+        self.radioButton_2.setText(QCoreApplication.translate("Dialog", u"Equaliza\u00e7\u00e3o de Histograma", None))
         self.radioButton_3.setText(QCoreApplication.translate("Dialog", u"Filtragem espacial", None))
         self.pushButton.setText(QCoreApplication.translate("Dialog", u"Selecionar", None))
     # retranslateUi

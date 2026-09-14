@@ -92,7 +92,7 @@ class UI_MainWindow(object):
         self.left_menu_bottom_layout.addWidget(self.config_button)
 
         # Label version
-        self.left_menu_version = QLabel("v1.0.0")
+        self.left_menu_version = QLabel("v1.1.0")
         self.left_menu_version.setAlignment(Qt.AlignCenter)
         self.left_menu_version.setMaximumHeight(30)
         self.left_menu_version.setMinimumHeight(30)
@@ -103,6 +103,17 @@ class UI_MainWindow(object):
         self.left_menu_layout.addItem(self.left_menu_spacer)
         self.left_menu_layout.addWidget(self.left_menu_bottom_frame)
         self.left_menu_layout.addWidget(self.left_menu_version)
+
+        # Adding the histogram equalization frame
+        self.equalization_hist_menu = QFrame()
+        self.equalization_hist_menu.setStyleSheet("background-color: #44475a")
+        self.equalization_hist_menu.setMaximumWidth(50)
+        self.equalization_hist_menu.setMinimumWidth(50)
+
+        # Left menu layout
+        self.equalization_hist_menu_layout = QVBoxLayout(self.equalization_hist_menu)
+        self.equalization_hist_menu_layout.setContentsMargins(0, 0, 0, 0)
+        self.equalization_hist_menu_layout.setSpacing(0)
 
         # Adding the transformations frame
         self.transformation_menu = QFrame()
@@ -117,6 +128,7 @@ class UI_MainWindow(object):
 
         # Configuring the buttons
         self.toggle2_button = PyPushButton(text = "Menu", icon_path = "icon_menu.svg")
+        self.toggle_histogram_button = PyPushButton(text = "Menu", icon_path = "icon_menu.svg")
         self.button_thresholding = PyPushButton(text = "Linearização", icon_path = "icon1.svg")
         self.button_negative = PyPushButton(text = "Negativa", icon_path = "icon2.svg")
         self.button_brightness = PyPushButton(text = "Brilho", icon_path = "icon10.svg")
@@ -128,9 +140,18 @@ class UI_MainWindow(object):
         self.button_steganography_apply = PyPushButton(text = "Aplicar Esteganografia", icon_path = "icon8.svg")
         self.button_steganography_undo = PyPushButton(text = "Decodificar Esteganografia", icon_path = "icon9.svg")
         self.transformation_download_button = PyPushButton(text = "Baixar Imagem", icon_path = "download.svg")        
+        self.histogram_download_button = PyPushButton(text = "Baixar Imagem", icon_path = "download.svg")        
         self.button_transformation_go_back = PyPushButton(text = "Voltar", icon_path = "arrow.svg")
+        self.button_histogram_go_back = PyPushButton(text = "Voltar", icon_path = "arrow.svg")
 
         # Adding the buttons to layout
+        self.equalization_hist_menu_layout.addWidget(self.toggle_histogram_button)
+        self.hist_spacer = QSpacerItem(20, 20, QSizePolicy.Minimum, QSizePolicy.Expanding)
+        self.equalization_hist_menu_layout.addItem(self.hist_spacer)
+        self.equalization_hist_menu_layout.addWidget(self.histogram_download_button)
+        self.equalization_hist_menu_layout.addWidget(self.button_histogram_go_back)
+        self.equalization_hist_menu.hide()
+
         self.transformation_menu_layout.addWidget(self.toggle2_button)
         self.transformation_menu_layout.addWidget(self.button_thresholding)
         self.transformation_menu_layout.addWidget(self.button_negative)
