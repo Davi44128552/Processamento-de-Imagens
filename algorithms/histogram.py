@@ -1,9 +1,10 @@
 # Importing the necessary libraries
 import numpy as np
 import matplotlib.pyplot as plt
+import mplcursors
 
 # Function to show the histogram
-def calculate_histogram(img_matrix: np.ndarray, norm = False) -> list:
+def calculate_histogram(img_matrix: np.ndarray, title: str = None, norm: bool = False, generate_graph: bool = False) -> list:
 
     img_size = 2 ** (img_matrix.itemsize * 8)
 
@@ -24,13 +25,27 @@ def calculate_histogram(img_matrix: np.ndarray, norm = False) -> list:
             intensity_frequency[i] = intensity_frequency[i] / (img_matrix_1d.size)
 
     x_axis = range(0, 256)
-    plt.bar(x_axis, intensity_frequency, color="blue", width=1.0)
-    
-    # Adicionando título para os eixos ajuda na visualização
-    plt.ylabel("Probabilidade")
-    plt.xlabel("Intensidade do Pixel")
-    plt.xlim([0, 255])
-    plt.show()
+
+    if (generate_graph):
+        # Generating the graph if necessary
+        fig_config, _ = plt.subplots(figsize = (10, 8))
+        fig_config.canvas.manager.set_window_title(title)
+        graph = plt.bar(x_axis, intensity_frequency, color="lightgray", width=1.0, edgecolor = "black")
+        plt.title(title)
+        plt.ylabel("Frequência")
+        plt.xlabel("Intensidade do Pixel")
+        plt.xlim([0, 255])
+
+        # Configing the cursor to show the data
+        cursor = mplcursors.cursor(graph, hover = False)
+
+        @cursor.connect("add")
+        def int_data(data):
+            x_val = int(round(data.target[0]))
+            y_val = data.target[1]
+            data.annotation.set_text(f"Intensidade: {x_val} \nFrequência: {y_val}")
+
+        plt.show(block = False)
 
     # Returning the result
     return intensity_frequency
@@ -41,7 +56,7 @@ def histogram_equalization(img_matrix: np.ndarray) -> np.ndarray:
     img_size = 2 ** (img_matrix.itemsize * 8)
 
     # Calculating the histogram
-    img_histogram = calculate_histogram(img_matrix, norm = True)
+    img_histogram = calculate_histogram(img_matrix, norm = True, generate_graph = False)
 
     # applying the formula 3.3-4 from image processing book
     # We can use sum instead of integration

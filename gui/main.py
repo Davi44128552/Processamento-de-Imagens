@@ -2,6 +2,7 @@
 import sys
 import os
 import ctypes
+import time
 from qt_core import *
 from gui.windows.main_win.ui_main_window import *
 from PIL.ImageQt import ImageQt
@@ -12,6 +13,7 @@ directory = os.path.abspath(os.path.join(directory, ".."))
 sys.path.append(directory)
 from algorithms.intensity_transformations import *
 from algorithms.aux_functions import *
+from algorithms.histogram import *
 
 # Main window class
 class MainWindow(QMainWindow):
@@ -51,6 +53,9 @@ class MainWindow(QMainWindow):
         self.ui.button_steganography_undo.clicked.connect(self.open_steganography_decode)
         self.ui.transformation_download_button.clicked.connect(self.save_image)
         self.ui.button_transformation_go_back.clicked.connect(self.go_back)
+        self.ui.toggle_histogram_button.clicked.connect(lambda: self.toggle_button(self.ui.equalization_hist_menu))
+        self.ui.histogram_download_button.clicked.connect(self.save_image)
+        self.ui.button_histogram_go_back.clicked.connect(self.go_back)
 
         # Showing the GUI
         self.show()
@@ -76,6 +81,10 @@ class MainWindow(QMainWindow):
         # Removing the transformations menu
         self.ui.main_layout.removeWidget(self.ui.transformation_menu)
         self.ui.transformation_menu.hide()
+
+        # Removing the histogram menu
+        self.ui.main_layout.removeWidget(self.ui.equalization_hist_menu)
+        self.ui.equalization_hist_menu.hide()
 
         # Adding the left menu layout
         self.ui.main_layout.insertWidget(0, self.ui.left_menu)
@@ -168,6 +177,21 @@ class MainWindow(QMainWindow):
         self.matrix = conversion_to_matrix(img_path)
         self.final_image = conversion_to_image(self.matrix)
 
+    # Function to apply the histogram
+    def apply_histogram(self, img_path):
+
+        # Adding the histogram menu
+        self.ui.main_layout.removeWidget(self.ui.left_menu)
+        self.ui.left_menu.hide()
+        self.ui.main_layout.insertWidget(0, self.ui.equalization_hist_menu)
+        self.ui.equalization_hist_menu.show()
+
+        self.matrix = conversion_to_matrix(img_path)
+        converted_matrix = histogram_equalization(self.matrix)
+        self.apply_transformation(converted_matrix)
+        QTimer.singleShot(2000, lambda: calculate_histogram(self.matrix, title = "Histograma antes da equalização", generate_graph = True))
+        QTimer.singleShot(2000, lambda: calculate_histogram(converted_matrix, title = "Histograma depois da equalização", generate_graph = True))
+
     def active_button(self, selected_button):
 
         for button in self.button_list:
@@ -188,7 +212,9 @@ class MainWindow(QMainWindow):
                 self.transformation(file_path)
 
             elif (self.ui.select_part_window_ui.radioButton_2.isChecked()):
-                print("2")
+                
+                # Going to histogram function
+                self.apply_histogram(file_path)
 
             elif (self.ui.select_part_window_ui.radioButton_3.isChecked()):
                 print("3")
