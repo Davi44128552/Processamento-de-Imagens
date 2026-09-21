@@ -163,3 +163,29 @@ def median_filter(img_matrix: np.ndarray, dimension: int) -> np.ndarray:
     # Returning the final matrix
     final_matrix = np.clip(final_matrix, 0, 255)
     return final_matrix.astype(np.uint8)
+
+# High-boost
+def high_boost(img_matrix: np.ndarray, dimension_mean: int, k: float) -> np.ndarray:
+
+    # following the steps described in the book
+    # 1. blur the image
+    # Using mean filter
+    blur_image = mean_filter(img_matrix, dimension_mean)
+
+    # 2. subtracting the blurred image from the original
+    # Converting the matrix
+    img_matrix_converted = img_matrix.astype(np.float64)
+    blur_image = blur_image.astype(np.float64)
+    mask = img_matrix_converted - blur_image
+
+    # Applying k to the mask
+    mask = mask * k 
+
+    # 3. Applying the mask to the image
+    final_image = img_matrix_converted + mask
+
+    # Adjusting the values ​​to be in the range [0, 255]
+    final_image = np.clip(final_image, 0, 255)
+
+    # Returning the result
+    return final_image.astype(np.uint8)
