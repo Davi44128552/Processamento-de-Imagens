@@ -6,11 +6,11 @@ from PIL import Image
 import numpy as np
 # import matplotlib.pyplot as plt
 from algorithms import intensity_transformations as it
-from algorithms import histogram as hist
+# from algorithms import histogram as hist
 from algorithms.spatial_filtering import *
 
 # Lendo a imagem e a convertendo para matriz de cores
-image = Image.open("test_images/calopsita.jpg")
+image = Image.open("test_images/beatles.png")
 image = image.convert("L")
 matriz_cores = np.array(image)
 # matriz_cores2 = it.negative(matriz_cores)
@@ -23,23 +23,17 @@ matriz_cores = np.array(image)
 # matriz_cores9 = it.bit_plane_slicing(matriz_cores, 6)
 # matriz_cores10 = it.steganography_apply(matriz_cores, "Teste")
 # matriz_cores11 = hist.histogram_equalization(matriz_cores)
-# matriz_cores12 = convolution(matriz_cores, np.array([[-2, -1,  0],
-#                           [-1,  1,  1],
-#                           [ 0,  1,  2]], dtype=np.float32))
+# matriz_cores12 = convolution(matriz_cores, np.array([[1, 2,  1],
+#                            [0,  0,  0],
+#                            [ -1,  -2,  -1]], dtype=np.float32))
 # matriz_cores13 = mean_filter(matriz_cores, 55)
 # matriz_cores14 = gaussian_smoothing(matriz_cores, 55, 23.0)
 # matriz_cores15 = median_filter(matriz_cores, 33)
-matriz_cores16 = high_boost(matriz_cores, 3, 3.3)
-# matriz_cores2 = matriz_cores2.astype(np.uint8)
-# matriz_cores3 = matriz_cores3.astype(np.uint8)
-# matriz_cores4 = matriz_cores4.astype(np.uint8) 
-# matriz_cores5 = matriz_cores5.astype(np.uint8)
-# matriz_cores6 = matriz_cores6.astype(np.uint8)
-# matriz_cores7 = matriz_cores7.astype(np.uint8)
-# matriz_cores8 = matriz_cores8.astype(np.uint8)
-# matriz_cores9 = matriz_cores9.astype(np.uint8)
-# matriz_cores10 = matriz_cores10.astype(np.uint8)
-# matriz_cores11 = matriz_cores11.astype(np.uint8)
+# matriz_cores16 = high_boost(matriz_cores, 3, 3.3)
+matriz_cores17 = sobel(matriz_cores, 'x')
+matriz_cores18 = sobel(matriz_cores, 'y')
+matriz_cores19 = magnitude_gradient(matriz_cores)
+
 # Convertendo novamente para imagem
 # image = Image.fromarray(matriz_cores)
 # image2 = Image.fromarray(matriz_cores2)
@@ -56,7 +50,10 @@ matriz_cores16 = high_boost(matriz_cores, 3, 3.3)
 # image13 = Image.fromarray(matriz_cores13)
 # image14 = Image.fromarray(matriz_cores14)
 # image15 = Image.fromarray(matriz_cores15)
-image16 = Image.fromarray(matriz_cores16)
+# image16 = Image.fromarray(matriz_cores16)
+image17 = Image.fromarray(matriz_cores17)
+image18 = Image.fromarray(matriz_cores18)
+image19 = Image.fromarray(matriz_cores19)
 # Mostrando o resultado
 # image.show()
 # image2.show()
@@ -67,10 +64,13 @@ image16 = Image.fromarray(matriz_cores16)
 # image7.show()
 # image8.show()
 # image11.show()
-# image12.save("test_images/resultado12.bmp")
+# image12.save("test_images/resultado12b.bmp")
 # image13.save("test_images/resultado13.bmp")
 # image14.save("test_images/imagem14.bmp")
 # image15.save("test_images/imagem15.bmp")
-image16.save("test_images/imagem16.bmp")
+# image16.save("test_images/imagem16.bmp")
+image17.save("test_images/imagem17.bmp")
+image18.save("test_images/imagem18.bmp")
+image19.save("test_images/imagem19.bmp")
 # image10.save("test_images/imagem10.bmp")
 # print(it.steganography_decoder(matriz_cores10))

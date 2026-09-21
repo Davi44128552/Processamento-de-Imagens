@@ -2,6 +2,7 @@
 
 # Importing the necessary libraries
 import numpy as np
+from algorithms.intensity_transformations import *
 
 # Convolution
 def convolution(img_matrix: np.ndarray, filter: np.ndarray) -> np.ndarray:
@@ -189,3 +190,60 @@ def high_boost(img_matrix: np.ndarray, dimension_mean: int, k: float) -> np.ndar
 
     # Returning the result
     return final_image.astype(np.uint8)
+
+# Sobel filtering
+def sobel(img_matrix: np.ndarray, axis: str) -> np.ndarray:
+
+    # Defining the sobel's kernels
+    x_kernel = np.array([[-1, 0, 1],
+                         [-2, 0, 2],
+                         [-1, 0, 1]])
+
+    y_kernel = np.array([[1, 2, 1],
+                         [0, 0, 0],
+                         [-1, -2, -1]])
+
+
+    if (axis == 'x'):
+
+        # Applying the filter in the image
+        x_filtered = convolution(img_matrix, x_kernel)
+
+        # Normalizing the matrix
+        x_filtered_normalized = x_filtered - np.min(x_filtered)
+        x_filtered_normalized = (x_filtered_normalized / np.max(x_filtered_normalized)) * 255
+
+
+    if (axis == 'y'):
+
+        # Applying the filter in the image
+        y_filtered = convolution(img_matrix, y_kernel)
+
+        # Normalizing the matrix
+        y_filtered_normalized = y_filtered - np.min(y_filtered)
+        y_filtered_normalized = (y_filtered_normalized / np.max(y_filtered_normalized)) * 255
+
+    # Defining the final matrix
+    if (axis == 'x'):
+        final_matrix = x_filtered_normalized
+    elif (axis == 'y'):
+        final_matrix = y_filtered_normalized
+
+    # Returning the final matriz
+    return final_matrix.astype(np.uint8)
+
+# Magnitude gradient
+def magnitude_gradient(img_matrix: np.ndarray):
+
+    # Obtaining the x and y filtered image
+    x_filtered = sobel(img_matrix, 'x').astype(np.float64)
+    y_filtered = sobel(img_matrix, 'y').astype(np.float64)
+
+    # Applying the soma described in book |G| = |gx| + |gy|
+    sum_matrix = np.abs(x_filtered) + np.abs(y_filtered)
+
+    # Applying thresholding
+    sum_matrix = thresholding(sum_matrix, 128)
+
+    # Returning the result
+    return sum_matrix.astype(np.uint8)
