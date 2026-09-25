@@ -8,6 +8,7 @@ import numpy as np
 from algorithms import intensity_transformations as it
 # from algorithms import histogram as hist
 from algorithms.spatial_filtering import *
+from algorithms.geometric_operations import *
 
 # Lendo a imagem e a convertendo para matriz de cores
 image = Image.open("test_images/beatles.png")
@@ -23,16 +24,17 @@ matriz_cores = np.array(image)
 # matriz_cores9 = it.bit_plane_slicing(matriz_cores, 6)
 # matriz_cores10 = it.steganography_apply(matriz_cores, "Teste")
 # matriz_cores11 = hist.histogram_equalization(matriz_cores)
-# matriz_cores12 = convolution(matriz_cores, np.array([[1, 2,  1],
-#                            [0,  0,  0],
-#                            [ -1,  -2,  -1]], dtype=np.float32))
+# matriz_cores12 = convolution(matriz_cores, np.array([[-2, -1,  0],
+#                             [-1,  1,  1],
+#                             [0,  1,  2]], dtype=np.float32))
 # matriz_cores13 = mean_filter(matriz_cores, 55)
 # matriz_cores14 = gaussian_smoothing(matriz_cores, 55, 23.0)
 # matriz_cores15 = median_filter(matriz_cores, 33)
 # matriz_cores16 = high_boost(matriz_cores, 3, 3.3)
-matriz_cores17 = sobel(matriz_cores, 'x')
-matriz_cores18 = sobel(matriz_cores, 'y')
-matriz_cores19 = magnitude_gradient(matriz_cores)
+# matriz_cores17 = sobel(matriz_cores, 'x')
+# matriz_cores18 = sobel(matriz_cores, 'y')
+# matriz_cores19 = magnitude_gradient(matriz_cores)
+matriz_cores20 = scaling(matriz_cores, 2, 2, "")
 
 # Convertendo novamente para imagem
 # image = Image.fromarray(matriz_cores)
@@ -51,9 +53,10 @@ matriz_cores19 = magnitude_gradient(matriz_cores)
 # image14 = Image.fromarray(matriz_cores14)
 # image15 = Image.fromarray(matriz_cores15)
 # image16 = Image.fromarray(matriz_cores16)
-image17 = Image.fromarray(matriz_cores17)
-image18 = Image.fromarray(matriz_cores18)
-image19 = Image.fromarray(matriz_cores19)
+# image17 = Image.fromarray(matriz_cores17)
+# image18 = Image.fromarray(matriz_cores18)
+# image19 = Image.fromarray(matriz_cores19)
+image20 = Image.fromarray(matriz_cores20)
 # Mostrando o resultado
 # image.show()
 # image2.show()
@@ -69,8 +72,9 @@ image19 = Image.fromarray(matriz_cores19)
 # image14.save("test_images/imagem14.bmp")
 # image15.save("test_images/imagem15.bmp")
 # image16.save("test_images/imagem16.bmp")
-image17.save("test_images/imagem17.bmp")
-image18.save("test_images/imagem18.bmp")
-image19.save("test_images/imagem19.bmp")
+# image17.save("test_images/imagem17.bmp")
+# image18.save("test_images/imagem18.bmp")
+# image19.save("test_images/imagem19.bmp")
+image20.save("test_images/imagem20.bmp")
 # image10.save("test_images/imagem10.bmp")
 # print(it.steganography_decoder(matriz_cores10))
