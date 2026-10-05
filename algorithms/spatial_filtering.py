@@ -5,7 +5,7 @@ import numpy as np
 from algorithms.intensity_transformations import *
 
 # Convolution
-def convolution(img_matrix: np.ndarray, filter: np.ndarray) -> np.ndarray:
+def convolution(img_matrix: np.ndarray, filter: np.ndarray, float_result: bool = False) -> np.ndarray:
 
     # Checking if the filter dimensions are valid
     if ((filter.shape[0] % 2 == 0) or (filter.shape[1] % 2 == 0)):
@@ -34,6 +34,8 @@ def convolution(img_matrix: np.ndarray, filter: np.ndarray) -> np.ndarray:
             final_matrix[i][j] = np.sum(product)
             
     # Returning the final matrix
+    if (float_result):
+        return final_matrix.astype(np.float64)
     final_matrix = np.clip(final_matrix, 0, 255)
     return final_matrix.astype(np.uint8)
 
@@ -165,13 +167,58 @@ def median_filter(img_matrix: np.ndarray, dimension: int) -> np.ndarray:
     final_matrix = np.clip(final_matrix, 0, 255)
     return final_matrix.astype(np.uint8)
 
+# Laplacian filter
+def laplacian(img_matrix: np.ndarray, kernel: int, dimension_log: int, standard_deviation_log: float, log: bool = True) -> np.ndarray:
+
+    # If LoG is true, we apply 
+    if (log):
+        img_matrix_input = gaussian_smoothing(img_matrix, dimension_log, standard_deviation_log)
+    else:
+        img_matrix_input = img_matrix
+
+    img_matrix_input = img_matrix_input.astype(np.float64)
+
+    # Choosing the kernel
+    if (kernel == 1):
+        kernel_apply = np.array([[0, -1, 0], [-1, 4, -1], [0, -1, 0]])
+    elif (kernel == 2):
+        kernel_apply = np.array([[-1, -1, -1], [-1, 8, -1], [-1, -1, -1]])
+    elif (kernel == 3):
+        kernel_apply = np.array([[0, 1, 0], [1, -4, 1], [0, 1, 0]])
+    else:
+        kernel_apply = np.array([[1, 1, 1], [1, -8, 1], [1, 1, 1]])
+
+    # Applying the filter
+    final_matrix = convolution(img_matrix_input, kernel_apply, True)
+
+    # Sharpening
+    if (kernel == 1 or kernel == 2):
+        # f(x, y) + c * d²f(x, y)
+        final_matrix = img_matrix + final_matrix
+    else:
+        # f(x, y) - c * d²f(x, y)
+        final_matrix = img_matrix - final_matrix
+
+    # Normalizing
+    min_value = np.min(final_matrix)
+    if (min_value < 0):
+        final_matrix = final_matrix + np.abs(min_value)
+    max_value = np.max(final_matrix)
+    if (max_value > 0):
+        final_matrix = final_matrix / max_value
+
+    final_matrix = final_matrix * 255
+
+    # Returning the result
+    return final_matrix.astype(np.uint8)
+
 # High-boost
-def high_boost(img_matrix: np.ndarray, dimension_mean: int, k: float) -> np.ndarray:
+def high_boost(img_matrix: np.ndarray, dimension_gauss: int, k: float, standard_deviation_gauss: float) -> np.ndarray:
 
     # following the steps described in the book
     # 1. blur the image
     # Using mean filter
-    blur_image = mean_filter(img_matrix, dimension_mean)
+    blur_image = gaussian_smoothing(img_matrix, dimension_gauss, standard_deviation_gauss)
 
     # 2. subtracting the blurred image from the original
     # Converting the matrix
