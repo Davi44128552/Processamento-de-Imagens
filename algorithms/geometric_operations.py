@@ -65,3 +65,71 @@ def scaling(img_matrix: np.ndarray, sx: float, sy: float, alg_type: str) -> np.n
 
     # Returning the final matrix
     return result_matrix.astype(np.uint8)
+
+# Rotation function
+def rotation(img_matrix: np.ndarray, angle: float, pivot_x: int, pivot_y: int) -> np.ndarray:
+
+    # Taking the image dimensions
+    original_image_height = img_matrix.shape[0]
+    original_image_width = img_matrix.shape[1]
+    
+    # Converting the angle to radius
+    rad = angle * (np.pi / 180)
+
+    # Defining the result image dimension
+    q1 = [0, 0]
+    q2 = [original_image_width - 1, 0]
+    q3 = [0, original_image_height - 1]
+    q4 = [original_image_width - 1, original_image_height - 1]
+    q_list = [q1, q2, q3, q4]
+
+        # Calculating the distance between the qs and pivots
+    for q in q_list:
+        dx = q[0] - pivot_x
+        dy = q[1] - pivot_y
+        x_temp = dx * np.cos(rad) - dy * np.sin(rad)
+        y_temp = dx * np.sin(rad) + dy * np.cos(rad)
+        q[0] = x_temp + pivot_x
+        q[1] = y_temp + pivot_y
+
+    # Determining the Xmin and Xmax
+    X_min = min([q1[0], q2[0], q3[0], q4[0]])
+    X_max = max([q1[0], q2[0], q3[0], q4[0]])
+
+    # Determining the Ymin and Ymax
+    Y_min = min([q1[1], q2[1], q3[1], q4[1]])
+    Y_max = max([q1[1], q2[1], q3[1], q4[1]])
+
+    # Creating the new matrix
+    dimension = [int(round(Y_max - Y_min)), int(round(X_max - X_min))]
+    result_matrix = np.zeros((dimension[0], dimension[1]))
+
+    for r in range(0, dimension[0]):
+        for c in range(0, dimension[1]):
+
+            # Taking the pixels values
+            x_pixel = c + X_min
+            y_pixel = r + Y_min
+
+            # Calculating the distance between the pixel and the pivot
+            dx = x_pixel - pivot_x
+            dy = y_pixel - pivot_y
+
+            # Rotating the pixel
+            x = dx * np.cos(-rad) - dy * np.sin(-rad)
+            y = dx * np.sin(-rad) + dy * np.cos(-rad)
+
+            # Adding the pivot to the result
+            x = int(round(x + pivot_x))
+            y = int(round(y + pivot_y))
+
+            # Adding the result to the result matrix
+            # Checking if the pixel position is within the limit
+            condition1 = 0 <= x < original_image_width
+            condition2 = 0 <= y < original_image_height
+
+            if (condition1 and condition2):
+                result_matrix[r][c] = img_matrix[y][x]
+
+    # Returning the result
+    return result_matrix.astype(np.uint8)
