@@ -9,11 +9,18 @@ from algorithms import intensity_transformations as it
 # from algorithms import histogram as hist
 from algorithms.spatial_filtering import *
 from algorithms.geometric_operations import *
+from algorithms.frequency_domain_filtering import *
 
 # Lendo a imagem e a convertendo para matriz de cores
 image = Image.open("test_images/beatles.png")
 image = image.convert("L")
 matriz_cores = np.array(image)
+img_listras = np.array([
+    [0, 255, 0, 255],
+    [0, 255, 0, 255],
+    [0, 255, 0, 255],
+    [0, 255, 0, 255]
+], dtype=np.float64)
 # matriz_cores2 = it.negative(matriz_cores)
 # matriz_cores3 = it.thresholding(matriz_cores)
 # matriz_cores4 = it.logarithm_transformation(matriz_cores)
@@ -82,5 +89,6 @@ image22 = Image.fromarray(matriz_cores22)
 # image20.save("test_images/imagem20.bmp")
 # image21.save("test_images/imagem21.bmp")
 image22.save("test_images/imagem22.bmp")
+print(discrete_fourier_transform(img_listras))
 # image10.save("test_images/imagem10.bmp")
 # print(it.steganography_decoder(matriz_cores10))
