@@ -1,0 +1,153 @@
+# Importing the necessary libraries
+import numpy as np
+
+# Function to convert RGB -> HSI
+def convert_rgb_to_hsi(img_matrix: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+
+    # Initial parameters
+    input_matrix = img_matrix.astype(np.float64) / 255.0
+    R = input_matrix[:, :, 0]
+    G = input_matrix[:, :, 1]
+    B = input_matrix[:, :, 2]
+
+    # H = HUE / S = SATURATION / I = INTENSITY
+
+    # Calculating Intensity
+    # Defined by formula (R + G + B) / 3
+    I = (R + G + B) / 3
+
+    # Calculating Saturation
+    # Defined by formula 1 - ((3 / (R + G + B)) * min(R, G, B))
+    S = 1 - (((3) / (R + G + B + 1e-8)) * np.min(input_matrix, axis = 2))
+
+    # Calculating Hue
+    x1 = 0.5 * ((R - G) + (R - B))
+    x2 = np.sqrt(np.power((R - G), 2) + 
+    (R - B) * (G - B))
+    theta = np.clip(x1 / (x2 + 1e-8), -1.0, 1.0)
+    theta = np.arccos(theta)
+    theta = np.degrees(theta)
+
+    # Defining hue values
+    condition = B <= G
+    H = np.where(condition, theta, 360.0 - theta)
+    return H, S, I
+
+# Function to convert HSI -> RGB
+def convert_hsi_to_rgb(H: np.ndarray, S: np.ndarray, I: np.ndarray) -> np.ndarray:
+
+    # Creating the R, G and B matrices
+    R = np.zeros((H.shape[0], H.shape[1]))
+    R = R.astype(np.float64)
+
+    G = np.zeros((H.shape[0], H.shape[1]))
+    G = G.astype(np.float64)
+
+    B = np.zeros((H.shape[0], H.shape[1]))
+    B = B.astype(np.float64)
+    
+    # When converting from HSI to RGB, we must divide the calculation into 3 sectors, based on the value of the H angle.
+
+    # 1: RG (0 <= H < 120)
+    # R = I * [1 + (S*cos(H) / (cos(60 - H)))]
+    # G = 3I - (R + B)
+    # B = I(1 - S)
+
+    condition1 = (H >= 0) & (H < 120)
+    B[condition1] = I[condition1] * (1 - S[condition1])
+    R[condition1] = I[condition1] * (1 + ((S[condition1] * np.cos(np.radians(H[condition1]))) / (np.cos(np.radians(60 - H[condition1])))))
+    G[condition1] = 3 * I[condition1] - (R[condition1] + B[condition1])
+
+    # 2: GB (120 <= H < 240)
+    # G = I * [1 + (S*cos(H) / (cos(60 - H)))]
+    # B = 3I - (R + G)
+    # R = I(1 - S)
+
+    condition2 = (H >= 120) & (H < 240)
+    R[condition2] = I[condition2] * (1 - S[condition2])
+    G[condition2] = I[condition2] * (1 + ((S[condition2] * np.cos(np.radians(H[condition2] - 120))) / (np.cos(np.radians(180 - H[condition2])))))
+    B[condition2] = 3 * I[condition2] - (R[condition2] + G[condition2])
+
+    # 3: RB (240 <= H <= 360)
+    # B = I * [1 + (S*cos(H) / (cos(60 - H)))]
+    # R = 3I - (G + B)
+    # G = I(1 - S)
+
+    condition3 = (H >= 240) & (H <= 360)
+    G[condition3] = I[condition3] * (1 - S[condition3])
+    B[condition3] = I[condition3] * (1 + ((S[condition3] * np.cos(np.radians(H[condition3] - 240))) / (np.cos(np.radians(300 - H[condition3])))))
+    R[condition3] = 3 * I[condition3] - (G[condition3] + B[condition3])
+
+    # Merging the matrices
+    rgb_matrix = np.dstack((R, G, B))
+    final_matrix = np.clip(rgb_matrix, 0.0, 1.0)
+    final_matrix = final_matrix * 255
+
+    # Returning the result
+    return final_matrix.astype(np.uint8)
+
+# Grayscale algorithms
+    # Simple arithmetic mean
+def gray_scale_mean(img_matrix: np.ndarray) -> np.ndarray:
+
+    # Initial parameters
+    input_matrix = img_matrix.astype(np.float64)
+    R = input_matrix[:, :, 0]
+    G = input_matrix[:, :, 1]
+    B = input_matrix[:, :, 2]
+
+    # The mean is defined by (R + G + B) / 3
+    mean_matrix = (R + G + B) / 3.0
+
+    # Merging the matrices
+    final_matrix = np.dstack((mean_matrix, mean_matrix, mean_matrix))
+
+    # Returning the result
+    return final_matrix.astype(np.uint8)
+
+    # Weighted arithmetic mean
+def gray_scale_weigthted_arithmetic_mean(img_matrix: np.ndarray, wred: float = 0.299, wgreen: float = 0.587, wblue: float = 0.114) -> np.ndarray:
+    # The standardized coefficients of the NTSC / ITU-R BT.601 system are:
+    # R = 0.299
+    # G = 0.587
+    # B = 0.114
+
+    # Initial parameters
+    input_matrix = img_matrix.astype(np.float64)
+    R = input_matrix[:, :, 0]
+    G = input_matrix[:, :, 1]
+    B = input_matrix[:, :, 2]
+
+    # The formula is a simple weighted arithmetic mean
+    mean_matrix = ((R * wred) + (G * wgreen) + (B * wblue)) / (wred + wgreen + wblue)
+
+    # Merging the matrices
+    final_matrix = np.dstack((mean_matrix, mean_matrix, mean_matrix))
+
+    # Returning the result
+    return final_matrix.astype(np.uint8)
+
+# Negative Function
+def rgb_negative(img_matrix: np.ndarray, L = None) -> np.ndarray:
+
+    # Initial parameters
+    input_matrix = img_matrix.astype(np.float64)
+    R = input_matrix[:, :, 0]
+    G = input_matrix[:, :, 1]
+    B = input_matrix[:, :, 2]
+
+    # The logic is similar to the negative applied before, but now we will perform the calculation for each RGB channel.
+    if L is None:
+        L = 2 ** (img_matrix.itemsize * 8) # if uint8, itemsize = 1; if uint16, itemsize = ; ...
+
+    # Applying the formula L - 1 - img_matrix
+    R_negative = L - 1 - R
+    G_negative = L - 1 - G
+    B_negative = L - 1 - B
+
+    # Merging the matrices
+    final_matrix = np.dstack((R_negative, G_negative, B_negative))
+
+    # Returning the result
+    return final_matrix.astype(np.uint8)
+

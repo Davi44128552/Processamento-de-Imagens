@@ -10,10 +10,11 @@ from algorithms import intensity_transformations as it
 from algorithms.spatial_filtering import *
 from algorithms.geometric_operations import *
 from algorithms.frequency_domain_filtering import *
+from algorithms.colors_algorithms import *
 
 # Lendo a imagem e a convertendo para matriz de cores
-image = Image.open("test_images/beatles.png")
-image = image.convert("L")
+image = Image.open("test_images/beatles_colorido.png")
+image = image.convert("RGB")
 matriz_cores = np.array(image)
 img_listras = np.array([
     [0, 255, 0, 255],
@@ -43,7 +44,10 @@ img_listras = np.array([
 # matriz_cores19 = magnitude_gradient(matriz_cores)
 # matriz_cores20 = scaling(matriz_cores, 2, 1, "bilinear")
 # matriz_cores21 = laplacian(matriz_cores, 1, 3, 1, True)
-matriz_cores22 = rotation(matriz_cores, 222, 5, 5)
+# matriz_cores22 = rotation(matriz_cores, 222, 5, 5)
+# matriz_cores23 = gray_scale_mean(matriz_cores)
+# matriz_cores24 = gray_scale_weigthted_arithmetic_mean(matriz_cores)
+matriz_cores25 = rgb_negative(matriz_cores)
 
 # Convertendo novamente para imagem
 # image = Image.fromarray(matriz_cores)
@@ -67,7 +71,10 @@ matriz_cores22 = rotation(matriz_cores, 222, 5, 5)
 # image19 = Image.fromarray(matriz_cores19)
 # image20 = Image.fromarray(matriz_cores20)
 # image21 = Image.fromarray(matriz_cores21)
-image22 = Image.fromarray(matriz_cores22)
+# image22 = Image.fromarray(matriz_cores22)
+# image23 = Image.fromarray(matriz_cores23)
+# image24 = Image.fromarray(matriz_cores24)
+image25 = Image.fromarray(matriz_cores25)
 # Mostrando o resultado
 # image.show()
 # image2.show()
@@ -88,7 +95,9 @@ image22 = Image.fromarray(matriz_cores22)
 # image19.save("test_images/imagem19.bmp")
 # image20.save("test_images/imagem20.bmp")
 # image21.save("test_images/imagem21.bmp")
-image22.save("test_images/imagem22.bmp")
-print(discrete_fourier_transform(img_listras))
+# image22.save("test_images/imagem22.bmp")
+# image23.save("test_images/imagem23.bmp")
+# image24.save("test_images/imagem24.bmp")
+image25.save("test_images/imagem25.bmp")
 # image10.save("test_images/imagem10.bmp")
 # print(it.steganography_decoder(matriz_cores10))
