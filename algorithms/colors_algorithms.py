@@ -1,5 +1,6 @@
 # Importing the necessary libraries
 import numpy as np
+from .aux_functions import resize_image
 
 # Function to convert RGB -> HSI
 def convert_rgb_to_hsi(img_matrix: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
@@ -151,3 +152,33 @@ def rgb_negative(img_matrix: np.ndarray, L = None) -> np.ndarray:
     # Returning the result
     return final_matrix.astype(np.uint8)
 
+# Chroma-Key function
+def chroma_key(img_matrix: np.ndarray, background_img_matrix: np.ndarray, color_vector: list, tol: float) -> np.ndarray:
+    
+    # Resizing background matrix
+    resized_background_img = resize_image(img_matrix, background_img_matrix)
+    
+    # Converting some input values to float
+    img_matrix_float = img_matrix.astype(np.float64)
+    color_vector_float = np.array(color_vector, dtype = np.float64)
+
+    # Defining R, G, B in the image
+    R = img_matrix_float[:, :, 0]
+    G = img_matrix_float[:, :, 1]
+    B = img_matrix_float[:, :, 2]
+
+    # Calculating the Euclidean distance
+    R_euc = (R - color_vector_float[0]) ** 2
+    G_euc = (G - color_vector_float[1]) ** 2
+    B_euc = (B - color_vector_float[2]) ** 2
+    D = np.sqrt(R_euc + G_euc + B_euc)
+
+    # Creating a matrix to check which values in tol is greater than D[x, y]
+    Bool_matrix = D < tol
+
+    # Applying the mask in the input image
+    final_matrix = img_matrix.copy()
+    final_matrix[Bool_matrix] = resized_background_img[Bool_matrix]
+
+    # Returning the result image
+    return final_matrix.astype(np.uint8)
