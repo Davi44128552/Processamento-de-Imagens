@@ -14,8 +14,11 @@ from algorithms.colors_algorithms import *
 
 # Lendo a imagem e a convertendo para matriz de cores
 image = Image.open("test_images/beatles_colorido.png")
+fundo = Image.open("test_images/green.png")
 image = image.convert("RGB")
+fundo = fundo.convert("RGB")
 matriz_cores = np.array(image)
+fundo_matriz = np.array(fundo)
 img_listras = np.array([
     [0, 255, 0, 255],
     [0, 255, 0, 255],
@@ -47,8 +50,8 @@ img_listras = np.array([
 # matriz_cores22 = rotation(matriz_cores, 222, 5, 5)
 # matriz_cores23 = gray_scale_mean(matriz_cores)
 # matriz_cores24 = gray_scale_weigthted_arithmetic_mean(matriz_cores)
-matriz_cores25 = rgb_negative(matriz_cores)
-
+# matriz_cores25 = rgb_negative(matriz_cores)
+matriz_cores26 = chroma_key(fundo_matriz, matriz_cores, [0, 255, 0], 120.0)
 # Convertendo novamente para imagem
 # image = Image.fromarray(matriz_cores)
 # image2 = Image.fromarray(matriz_cores2)
@@ -74,7 +77,8 @@ matriz_cores25 = rgb_negative(matriz_cores)
 # image22 = Image.fromarray(matriz_cores22)
 # image23 = Image.fromarray(matriz_cores23)
 # image24 = Image.fromarray(matriz_cores24)
-image25 = Image.fromarray(matriz_cores25)
+# image25 = Image.fromarray(matriz_cores25)
+image26 = Image.fromarray(matriz_cores26)
 # Mostrando o resultado
 # image.show()
 # image2.show()
@@ -98,6 +102,7 @@ image25 = Image.fromarray(matriz_cores25)
 # image22.save("test_images/imagem22.bmp")
 # image23.save("test_images/imagem23.bmp")
 # image24.save("test_images/imagem24.bmp")
-image25.save("test_images/imagem25.bmp")
+# image25.save("test_images/imagem25.bmp")
+image26.save("test_images/imagem26.bmp")
 # image10.save("test_images/imagem10.bmp")
 # print(it.steganography_decoder(matriz_cores10))
