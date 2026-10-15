@@ -2,6 +2,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import mplcursors
+from .colors_algorithms import convert_rgb_to_hsi
 
 # Function to show the histogram
 def calculate_histogram(img_matrix: np.ndarray, title: str = None, norm: bool = False, generate_graph: bool = False) -> list:
@@ -76,3 +77,49 @@ def histogram_equalization(img_matrix: np.ndarray) -> np.ndarray:
 
     # Returning the final result
     return final_matrix.astype(np.uint8)
+
+# Histogram function to RGBI
+def rgb_histogram(img_matrix: np.ndarray, title: str = None, norm: bool = False, generate_graph: bool = False) -> list:
+
+    R = img_matrix[:, :, 0]
+    G = img_matrix[:, :, 1]
+    B = img_matrix[:, :, 2]
+    _, _, I = convert_rgb_to_hsi(img_matrix)
+    I = (255 * I).astype(np.uint8)
+
+    R_result = calculate_histogram(R, title, norm, False)
+    G_result = calculate_histogram(G, title, norm, False)
+    B_result = calculate_histogram(B, title, norm, False)
+    I_result = calculate_histogram(I, title, norm, False)
+
+    # Creating the graph, if necessary
+    if (generate_graph):
+        fig, axs = plt.subplots(2, 2, figsize = (12, 8))
+        x_axis = range(0, 256)
+        fig.suptitle(title)
+
+        # Red
+        axs[0, 0].bar(x_axis, R_result, color = 'red', width = 1.0, edgecolor = "black")
+        axs[0, 0].set_title('RED')
+        axs[0, 0].set_xlim([0, 256])
+
+        # Green
+        axs[0, 1].bar(x_axis, G_result, color = 'green', width = 1.0, edgecolor = "black")
+        axs[0, 1].set_title('GREEN')
+        axs[0, 1].set_xlim([0, 256])
+
+        # Blue
+        axs[1, 0].bar(x_axis, B_result, color = 'blue', width = 1.0, edgecolor = "black")
+        axs[1, 0].set_title('BLUE')
+        axs[1, 0].set_xlim([0, 256])
+
+        # Intensity
+        axs[1, 1].bar(x_axis, I_result, color = 'gray', width = 1.0, edgecolor = "black")
+        axs[1, 1].set_title('INTENSITY')
+        axs[1, 1].set_xlim([0, 256])
+
+        plt.tight_layout()
+        plt.show(block = True)
+
+    # Returning the results
+    return R_result, G_result, B_result, I_result
