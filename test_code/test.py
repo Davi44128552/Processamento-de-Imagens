@@ -11,6 +11,7 @@ from algorithms.spatial_filtering import *
 from algorithms.geometric_operations import *
 from algorithms.frequency_domain_filtering import *
 from algorithms.colors_algorithms import *
+from algorithms.histogram import *
 
 # Lendo a imagem e a convertendo para matriz de cores
 image = Image.open("test_images/beatles_colorido.png")
@@ -52,6 +53,7 @@ img_listras = np.array([
 # matriz_cores24 = gray_scale_weigthted_arithmetic_mean(matriz_cores)
 # matriz_cores25 = rgb_negative(matriz_cores)
 matriz_cores26 = chroma_key(fundo_matriz, matriz_cores, [0, 255, 0], 120.0)
+rgb_histogram(matriz_cores, "Teste", True, True)
 # Convertendo novamente para imagem
 # image = Image.fromarray(matriz_cores)
 # image2 = Image.fromarray(matriz_cores2)
