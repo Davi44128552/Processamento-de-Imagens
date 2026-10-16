@@ -2,7 +2,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import mplcursors
-from .colors_algorithms import convert_rgb_to_hsi
+from .colors_algorithms import convert_rgb_to_hsi, convert_hsi_to_rgb
 
 # Function to show the histogram
 def calculate_histogram(img_matrix: np.ndarray, title: str = None, norm: bool = False, generate_graph: bool = False) -> list:
@@ -123,3 +123,26 @@ def rgb_histogram(img_matrix: np.ndarray, title: str = None, norm: bool = False,
 
     # Returning the results
     return R_result, G_result, B_result, I_result
+
+# RGB Histogram equalization function
+def rgb_histogram_equalization(img_matrix: np.ndarray) -> np.ndarray:
+
+    # Converting RGB to HSI
+    H, S, I = convert_rgb_to_hsi(img_matrix)
+
+    # Converting I to uint8
+    I_input = I * 255.0
+    I_input = I_input.astype(np.uint8)
+
+    # Applying histogram equalization
+    I_output = histogram_equalization(I_input)
+
+    # Converting I output to [0.0, 1.0] range
+    I_output = I_output.astype(np.float64)
+    I_output = I_output / 255.0
+
+    # Converting HSI to RGB
+    final_matrix = convert_hsi_to_rgb(H, S, I_output)
+
+    # Returning the final matrix
+    return final_matrix.astype(np.uint8)
