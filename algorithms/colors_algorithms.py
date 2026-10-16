@@ -182,3 +182,45 @@ def chroma_key(img_matrix: np.ndarray, background_img_matrix: np.ndarray, color_
 
     # Returning the result image
     return final_matrix.astype(np.uint8)
+
+# Function to adjust HSI channels
+def adjust_hsi_channels(img_matrix: np.ndarray, shift_h: float = 0.0, scale_s: float = 1.0, scale_i: float = 1.0) -> np.ndarray:
+
+    # Taking HSI values
+    H, S, I = convert_rgb_to_hsi(img_matrix)
+
+    # Defining the new values
+    H_output = (H + shift_h) % 360.0
+
+    S_output = S * scale_s
+    S_output = np.clip(S_output, 0.0, 1.0)
+
+    I_output = I * scale_i
+    I_output = np.clip(I_output, 0.0, 1.0)
+
+    # Converting the output values into rgb
+    final_matrix = convert_hsi_to_rgb(H_output, S_output, I_output)
+
+    # Returning the final matrix
+    return final_matrix.astype(np.uint8)
+
+# Function to adjust color balance
+def adjust_color_balance(img_matrix: np.ndarray, shift_cr: float = 0.0, shift_mg: float = 0.0, shift_yb: float = 0.0) -> np.ndarray:
+
+    # Initial parameters
+    input_matrix = img_matrix.astype(np.float64)
+    R = input_matrix[:, :, 0]
+    G = input_matrix[:, :, 1]
+    B = input_matrix[:, :, 2]
+
+    # Applying the shifts
+    R_output = R + shift_cr
+    G_output = G + shift_mg
+    B_output = B + shift_yb
+
+    # Merging the channels
+    final_matrix = np.dstack((R_output, G_output, B_output))
+    final_matrix = np.clip(final_matrix, 0, 255)
+
+    # Returning the final matrix
+    return final_matrix.astype(np.uint8)
