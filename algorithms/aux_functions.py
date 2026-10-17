@@ -5,9 +5,9 @@ import cv2
 from functools import wraps
 
 # Function that convert image into matrix
-def conversion_to_matrix(file_path: str) -> np.ndarray:
+def conversion_to_matrix(file_path: str, matrix_type: str = "RGB") -> np.ndarray:
     image = Image.open(file_path)
-    image = image.convert("L")
+    image = image.convert(matrix_type)
     colors_matrix = np.array(image)
     return colors_matrix
 

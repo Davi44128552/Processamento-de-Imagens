@@ -1,8 +1,9 @@
 # Importing the necessary libraries
 import numpy as np
-from .aux_functions import next_power_of_two
+from .aux_functions import next_power_of_two, runs_rgb
 
 # Discrete Fourier Transform
+@runs_rgb
 def discrete_fourier_transform(img_matrix: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
 
     # Converting the matrix
@@ -34,41 +35,21 @@ def discrete_fourier_transform(img_matrix: np.ndarray) -> tuple[np.ndarray, np.n
     return real_matrix, imaginary_matrix
 
 # Functions for the fast Fourier transform
-# Cooley-Tukey algorithm for 1D matrices
-def cooley_tukey(matrix: np.ndarray) -> np.ndarray:
-
-    # Array size
-    array_size = matrix.shape[0]
-
-    # Cooley-Tukey is a divide and conquer algorithm
-    # Base case
-    if (array_size <= 1):
-        return matrix
-
-    # Dividing the matrix into even and odd indices
-    even_matrix = matrix[0::2]
-    odd_matrix = matrix[1::2]
-
-    # Applying the Cooley-Tukey test recursively to the new matrices
-    even_output = cooley_tukey(even_matrix)
-    odd_output = cooley_tukey(odd_matrix)
-
-    # Conquer: Calculating the Twiddle factors
-    # Defined by e^((-2jpik) / N)
-    factor = np.exp(-2j * np.pi * np.arange(array_size // 2) / array_size)
-
-    # Combining the results
-    first_half = even_output + factor * odd_output
-    second_half = even_output - factor * odd_output
-
-    # Concatenating the results
-    final_matrix = np.concatenate([first_half, second_half])
-
-    # Returning the result
-    return final_matrix
 
 # FFT Function
 def fast_fourier_transform(img_matrix: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+
+    # If matrix is 3D, then we calculate in each channel
+    if (len(img_matrix.shape) == 3):
+
+        real_channels = list()
+        imaginary_channels = list()
+
+        for i in range(0, 3):
+            real, imag = fast_fourier_transform(img_matrix[:, :, i])
+            real_channels.append(real)
+            imaginary_channels.append(imag)
+        return np.dstack(real_channels), np.dstack(imaginary_channels)
 
     # Converting the matrix
     input_matrix = img_matrix.astype(np.float64)
@@ -85,22 +66,15 @@ def fast_fourier_transform(img_matrix: np.ndarray) -> tuple[np.ndarray, np.ndarr
     padded_image = np.zeros((new_N, new_M)).astype(np.float64)
     padded_image[:N, :M] = input_matrix
 
-    # Applying the cooley tukey in each row
-    rows_fft = np.zeros((new_N, new_M), dtype = np.complex128)
-    for i in range(0, new_N):
-        rows_fft[i, :] = cooley_tukey(padded_image[i, :])
+    # Applying numpy FFT2D 
+    fft_result = np.fft.fft2(padded_image)
 
-    # Applying the cooley tukey in each column
-    columns_fft = np.zeros((new_N, new_M), dtype = np.complex128)
-    for j in range(0, new_M):
-        columns_fft[:, j] = cooley_tukey(rows_fft[:, j])
-
-    # Results
-    columns_fft_real = columns_fft.real
-    columns_fft_imaginary = columns_fft.imag
+    # Talking the result matrices
+    real_matrix = fft_result.real
+    imaginary_matrix = fft_result.imag
 
     # Returning the results
-    return columns_fft_real, columns_fft_imaginary
+    return real_matrix, imaginary_matrix
 
 # Function to get the result image of fft
 def get_result_image(real_matrix: np.ndarray, imaginary_matrix: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
@@ -109,22 +83,23 @@ def get_result_image(real_matrix: np.ndarray, imaginary_matrix: np.ndarray) -> t
     complex_matrix = real_matrix + 1j * imaginary_matrix
     shifted_complex_matrix = np.fft.fftshift(complex_matrix)
 
-    # Calculating the result
-
-    shifted_real_matrix = shifted_complex_matrix.real
-    shifted_imaginary_matrix = shifted_complex_matrix.imag
-
-    matrix_magnitude = np.sqrt(shifted_real_matrix ** 2 + shifted_imaginary_matrix ** 2)
+    matrix_magnitude = np.abs(shifted_complex_matrix)
     final_matrix = np.log(1 + matrix_magnitude)
 
     # Normalizing the matrix
-    final_matrix = (final_matrix - np.min(final_matrix)) / (np.max(final_matrix) - np.min(final_matrix))
-    final_matrix = final_matrix * 255
+    min_value = np.min(final_matrix)
+    max_value = np.max(final_matrix)
+
+    if (max_value > min_value):
+        final_matrix = (final_matrix - min_value) / (max_value - min_value) * 255.0 
+    else:
+        final_matrix = np.zeros_like(final_matrix)
 
     # Returning the final matrix
     return final_matrix.astype(np.uint8), shifted_complex_matrix
 
 # Function to invert fourier transform
+'''@runs_rgb
 def inverse_fft(shifted_complex_matrix: np.ndarray) -> np.ndarray:
 
     # Undo the shift
@@ -151,4 +126,4 @@ def inverse_fft(shifted_complex_matrix: np.ndarray) -> np.ndarray:
     final_matrix = np.clip(final_matrix, 0, 255)
 
     # Returning the result matrix
-    return final_matrix.astype(np.uint8)
+    return final_matrix.astype(np.uint8)'''
