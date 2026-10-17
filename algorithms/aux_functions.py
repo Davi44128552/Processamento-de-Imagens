@@ -39,6 +39,13 @@ def resize_image(img_matrix1: np.ndarray, img_matrix2: np.ndarray) -> np.ndarray
     # Returning the result 
     return result_matrix.astype(np.uint8)
 
+# Function to find the next power of two
+def next_power_of_two(n: int) -> int:
+
+    if (n == 0):
+        return 1
+    return 2 ** (n - 1).bit_length()
+
 # Function that allows image processing algorithms that run on 2D matrices to run on color matrices.
 def runs_rgb(function):
 
