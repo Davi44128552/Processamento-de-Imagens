@@ -224,3 +224,38 @@ def adjust_color_balance(img_matrix: np.ndarray, shift_cr: float = 0.0, shift_mg
 
     # Returning the final matrix
     return final_matrix.astype(np.uint8)
+
+# Functions to use sepia filter
+# There are three methods we can apply sepia
+
+# RGB transformation (Industry standard)
+def sepia_rgb(img_matrix: np.ndarray, filter_matrix: np.ndarray = None) -> np.ndarray:
+
+    # Initial parameters
+    input_matrix = img_matrix.astype(np.float64)
+    R = input_matrix[:, :, 0]
+    G = input_matrix[:, :, 1]
+    B = input_matrix[:, :, 2]
+
+    # if the user has not specified a filtering matrix, we will use the industry standard
+    if (filter_matrix is None):
+        filter_matrix = np.array([[0.393, 0.769, 0.189],
+                                    [0.349, 0.686, 0.168],
+                                    [0.272, 0.534, 0.131]])
+
+    # Checking if the input matrix is 3x3
+    elif (filter_matrix.shape[0] != 3 or filter_matrix.shape[1] != 3):
+        print("A matriz de entrada deve ser 3x3!")
+        return
+
+    # Applying the matrix into the image channels
+    R_output = filter_matrix[0, 0] * R + filter_matrix[0, 1] * G + filter_matrix[0, 2] * B
+    G_output = filter_matrix[1, 0] * R + filter_matrix[1, 1] * G + filter_matrix[1, 2] * B
+    B_output = filter_matrix[2, 0] * R + filter_matrix[2, 1] * G + filter_matrix[2, 2] * B
+
+    # Merging the matrices
+    final_matrix = np.dstack((R_output, G_output, B_output))
+    final_matrix = np.clip(final_matrix, 0, 255)
+
+    # Returning the final matrix
+    return final_matrix.astype(np.uint8)

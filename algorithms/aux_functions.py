@@ -2,6 +2,7 @@
 import numpy as np
 from PIL import Image
 import cv2
+from functools import wraps
 
 # Function that convert image into matrix
 def conversion_to_matrix(file_path: str) -> np.ndarray:
@@ -37,3 +38,31 @@ def resize_image(img_matrix1: np.ndarray, img_matrix2: np.ndarray) -> np.ndarray
 
     # Returning the result 
     return result_matrix.astype(np.uint8)
+
+# Function that allows image processing algorithms that run on 2D matrices to run on color matrices.
+def runs_rgb(function):
+
+    @wraps(function)
+    def wrapper(img_matrix: np.ndarray, *args, **kwargs):
+        if len(img_matrix.shape) == 3:
+
+            # Channels
+            R = img_matrix[:, :, 0]
+            G = img_matrix[:, :, 1]
+            B = img_matrix[:, :, 2]
+
+            # Applying the input function
+            R_output = function(R, *args, **kwargs)
+            G_output = function(G, *args, **kwargs)
+            B_output = function(B, *args, **kwargs)
+
+            # Merging the channels
+            final_matrix = np.dstack((R_output, G_output, B_output))
+
+        else:
+            final_matrix = function(img_matrix, *args, **kwargs)
+
+        # Returning the final matrix
+        return final_matrix
+
+    return wrapper

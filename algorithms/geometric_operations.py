@@ -1,7 +1,9 @@
 # Importing the necessary modules
 import numpy as np
+from .aux_functions import runs_rgb
 
 # Scaling function
+@runs_rgb
 def scaling(img_matrix: np.ndarray, sx: float, sy: float, alg_type: str) -> np.ndarray:
 
     # Taking the original matrix info
@@ -67,6 +69,7 @@ def scaling(img_matrix: np.ndarray, sx: float, sy: float, alg_type: str) -> np.n
     return result_matrix.astype(np.uint8)
 
 # Rotation function
+@runs_rgb
 def rotation(img_matrix: np.ndarray, angle: float, pivot_x: int, pivot_y: int) -> np.ndarray:
 
     # Taking the image dimensions

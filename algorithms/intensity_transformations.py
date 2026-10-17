@@ -1,9 +1,11 @@
 # Importing the necessary libraries
 import numpy as np
+from .aux_functions import runs_rgb
 
 # Implementing intesity transfomation functions
 # Thresholding
-def thresholding(img_matrix: np.ndarray, T: int) -> np.ndarray:
+@runs_rgb
+def thresholding(img_matrix: np.ndarray, T: int = 128) -> np.ndarray:
 
     # Checking if T is NOT between 0 and 255
     if (not(0 <= T <= 255)):
@@ -15,7 +17,7 @@ def thresholding(img_matrix: np.ndarray, T: int) -> np.ndarray:
     final_matrix = np.where(condition, 0, 255)
 
     # Returning the final matrix
-    return final_matrix
+    return final_matrix.astype(np.uint8)
 
 # Negative
 def negative(img_matrix: np.ndarray, L = None) -> np.ndarray:
@@ -32,6 +34,7 @@ def negative(img_matrix: np.ndarray, L = None) -> np.ndarray:
     return final_matrix
 
 # Brightness
+@runs_rgb
 def brightness(img_matrix: np.ndarray, k: float = 1) -> np.ndarray:
 
     # Just mutiply the matrix by the constant k
@@ -42,6 +45,7 @@ def brightness(img_matrix: np.ndarray, k: float = 1) -> np.ndarray:
     return final_matrix.astype(np.uint8)
 
 # Logarithm
+@runs_rgb
 def logarithm_transformation(img_matrix: np.ndarray, c = None) -> np.ndarray:
 
     # According to the book, the logarithm transformation is defined by c log (1 + r)
@@ -61,6 +65,7 @@ def logarithm_transformation(img_matrix: np.ndarray, c = None) -> np.ndarray:
     return final_matrix.astype(np.uint8)
 
 # Power-law (gamma)
+@runs_rgb
 def power_law_transformation(img_matrix: np.ndarray, gamma: float = 1) -> np.ndarray:
 
     # According to the book, the power-law (gamma) transformation is defined by c r^gamma
@@ -83,6 +88,7 @@ def power_law_transformation(img_matrix: np.ndarray, gamma: float = 1) -> np.nda
 
 # Piecewise Linear Transformation Functions
     # Constrast stretching
+@runs_rgb
 def contrast_stretching(img_matrix: np.ndarray) -> np.ndarray:
 
     # This method consists of taking the rmin of the image and stretching it to imin, and take the rmax of the image and stretching it to imax
@@ -107,6 +113,7 @@ def contrast_stretching(img_matrix: np.ndarray) -> np.ndarray:
     return final_matrix.astype(img_matrix.dtype)
 
     # Intensity-Level Slicing
+@runs_rgb
 def intensity_level_slicing(img_matrix: np.ndarray, min_value: int, max_value: int, alg_type: str) -> np.ndarray:
 
     # This method takes a range, and each pixel within that range has the value 255, while the others have the value 0
@@ -144,6 +151,7 @@ def intensity_level_slicing(img_matrix: np.ndarray, min_value: int, max_value: i
     return final_matrix.astype(img_matrix.dtype)
 
     # Bit-Plane slicing
+@runs_rgb
 def bit_plane_slicing(img_matrix: np.ndarray, bit_reference: int) -> np.ndarray:
 
     # Checking if the bit_reference is a valid value

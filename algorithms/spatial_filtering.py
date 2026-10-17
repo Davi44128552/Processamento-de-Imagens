@@ -3,8 +3,10 @@
 # Importing the necessary libraries
 import numpy as np
 from algorithms.intensity_transformations import *
+from .aux_functions import runs_rgb
 
 # Convolution
+@runs_rgb
 def convolution(img_matrix: np.ndarray, filter: np.ndarray, float_result: bool = False) -> np.ndarray:
 
     # Checking if the filter dimensions are valid
@@ -40,6 +42,7 @@ def convolution(img_matrix: np.ndarray, filter: np.ndarray, float_result: bool =
     return final_matrix.astype(np.uint8)
 
 # Mean filter
+@runs_rgb
 def mean_filter(img_matrix: np.ndarray, dimension: int) -> np.ndarray:
 
     # Checking if the dimension is valid
@@ -76,6 +79,7 @@ def mean_filter(img_matrix: np.ndarray, dimension: int) -> np.ndarray:
     return final_matrix.astype(np.uint8)
 
 # Gaussian Smoothing
+@runs_rgb
 def gaussian_smoothing(img_matrix: np.ndarray, dimension: int, standard_deviation: float) -> np.ndarray:
 
     # Checking if the dimension is valid
@@ -131,6 +135,7 @@ def gaussian_smoothing(img_matrix: np.ndarray, dimension: int, standard_deviatio
     return final_matrix.astype(np.uint8)
 
 # Median filter
+@runs_rgb
 def median_filter(img_matrix: np.ndarray, dimension: int) -> np.ndarray:
 
     # Checking if the dimension is valid
@@ -168,6 +173,7 @@ def median_filter(img_matrix: np.ndarray, dimension: int) -> np.ndarray:
     return final_matrix.astype(np.uint8)
 
 # Laplacian filter
+@runs_rgb
 def laplacian(img_matrix: np.ndarray, kernel: int, dimension_log: int, standard_deviation_log: float, log: bool = True) -> np.ndarray:
 
     # If LoG is true, we apply 
@@ -213,6 +219,7 @@ def laplacian(img_matrix: np.ndarray, kernel: int, dimension_log: int, standard_
     return final_matrix.astype(np.uint8)
 
 # High-boost
+@runs_rgb
 def high_boost(img_matrix: np.ndarray, dimension_gauss: int, k: float, standard_deviation_gauss: float) -> np.ndarray:
 
     # following the steps described in the book
@@ -239,6 +246,7 @@ def high_boost(img_matrix: np.ndarray, dimension_gauss: int, k: float, standard_
     return final_image.astype(np.uint8)
 
 # Sobel filtering
+@runs_rgb
 def sobel(img_matrix: np.ndarray, axis: str) -> np.ndarray:
 
     # Defining the sobel's kernels
@@ -280,6 +288,7 @@ def sobel(img_matrix: np.ndarray, axis: str) -> np.ndarray:
     return final_matrix.astype(np.uint8)
 
 # Magnitude gradient
+@runs_rgb
 def magnitude_gradient(img_matrix: np.ndarray):
 
     # Obtaining the x and y filtered image
