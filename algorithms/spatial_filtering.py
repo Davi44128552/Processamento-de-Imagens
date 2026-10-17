@@ -4,6 +4,7 @@
 import numpy as np
 from algorithms.intensity_transformations import *
 from .aux_functions import runs_rgb
+from numpy.lib.stride_tricks import sliding_window_view
 
 # Convolution
 @runs_rgb
@@ -23,18 +24,9 @@ def convolution(img_matrix: np.ndarray, filter: np.ndarray, float_result: bool =
     convolution_filter = np.flip(filter)
 
     # Applying the filter in the image
-    final_matrix = np.zeros((img_matrix.shape[0], img_matrix.shape[1]))
+    windows = sliding_window_view(new_matrix, window_shape = filter.shape)
+    final_matrix = np.tensordot(windows, convolution_filter, axes = ([2, 3], [0, 1]))
 
-    for i in range(0, final_matrix.shape[0]):
-        for j in range(0, final_matrix.shape[1]):
-
-            # Taking the submatrix to apply the filter
-            operation_matrix = new_matrix[i : i + filter.shape[0], j : j + filter.shape[1]]
-
-            # Applying the operation
-            product = operation_matrix * convolution_filter
-            final_matrix[i][j] = np.sum(product)
-            
     # Returning the final matrix
     if (float_result):
         return final_matrix.astype(np.float64)
@@ -52,30 +44,12 @@ def mean_filter(img_matrix: np.ndarray, dimension: int) -> np.ndarray:
 
     # Taking the number of elements
     n_elements = dimension * dimension
+    mean_kernel = np.ones((dimension, dimension)) / n_elements
 
-    # Creating the new matrix wit padding
-    new_rows = (dimension - 1) // 2
-    new_columns = (dimension - 1) // 2
-    new_matrix = np.pad(img_matrix, ((new_rows, new_rows), (new_columns, new_columns)), mode = 'edge')
-
-    # Applying the filter in the image
-    final_matrix = np.zeros((img_matrix.shape[0], img_matrix.shape[1]))
-
-    for i in range(0, final_matrix.shape[0]):
-        for j in range(0, final_matrix.shape[1]):
-
-            # Taking the submatrix to apply the filter
-            operation_matrix = new_matrix[i : i + dimension, j : j + dimension]
-
-            # Applying the operation
-            elements_sum = np.sum(operation_matrix)
-            mean_value = elements_sum // n_elements
-
-            # Adding the value in the final matrix
-            final_matrix[i][j] = mean_value
+    # Applying convolution function
+    final_matrix = convolution(img_matrix, mean_kernel)
 
     # Returning the final matrix
-    final_matrix = np.clip(final_matrix, 0, 255)
     return final_matrix.astype(np.uint8)
 
 # Gaussian Smoothing
@@ -112,10 +86,9 @@ def gaussian_smoothing(img_matrix: np.ndarray, dimension: int, standard_deviatio
     gauss_filter = gauss_filter / elements_sum
 
     # Applying the filter
-    final_matrix = gauss_filter
+    final_matrix = convolution(img_matrix, gauss_filter)
 
     # Returning the final matrix
-    final_matrix = np.clip(final_matrix, 0, 255)
     return final_matrix.astype(np.uint8)
 
 # Median filter
@@ -189,22 +162,24 @@ def laplacian(img_matrix: np.ndarray, kernel: int, dimension_log: int, standard_
         # f(x, y) - c * d²f(x, y)
         final_matrix = img_matrix - final_matrix
 
-    # Normalizing
-    min_value = np.min(final_matrix)
-    if (min_value < 0):
-        final_matrix = final_matrix + np.abs(min_value)
-    max_value = np.max(final_matrix)
-    if (max_value > 0):
-        final_matrix = final_matrix / max_value
+    # # Normalizing
+    # min_value = np.min(final_matrix)
+    # if (min_value < 0):
+    #     final_matrix = final_matrix + np.abs(min_value)
+    # max_value = np.max(final_matrix)
+    # if (max_value > 0):
+    #     final_matrix = final_matrix / max_value
 
-    final_matrix = final_matrix * 255
+    # final_matrix = final_matrix * 255
+
+    final_matrix = np.clip(final_matrix, 0, 255)
 
     # Returning the result
     return final_matrix.astype(np.uint8)
 
 # High-boost
 @runs_rgb
-def high_boost(img_matrix: np.ndarray, dimension_gauss: int, k: float, standard_deviation_gauss: float) -> np.ndarray:
+def high_boost(img_matrix: np.ndarray, dimension_gauss: int, standard_deviation_gauss: float, k: float) -> np.ndarray:
 
     # following the steps described in the book
     # 1. blur the image

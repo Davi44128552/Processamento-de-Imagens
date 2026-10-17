@@ -2,7 +2,6 @@
 import sys
 import os
 import ctypes
-import time
 from qt_core import *
 from gui.windows.main_win.ui_main_window import *
 from PIL.ImageQt import ImageQt
@@ -14,6 +13,12 @@ sys.path.append(directory)
 from algorithms.intensity_transformations import *
 from algorithms.aux_functions import *
 from algorithms.histogram import *
+from algorithms.spatial_filtering import *
+from algorithms.geometric_operations import *
+from algorithms.frequency_domain_filtering import *
+from algorithms.colors_algorithms import *
+from gui.dialogs.dialog_convolution_matrix import ConvolutionMatrixDialog
+from gui.dialogs.dialog_hsi_result import HSIDialog
 
 # Main window class
 class MainWindow(QMainWindow):
@@ -57,6 +62,47 @@ class MainWindow(QMainWindow):
         self.ui.histogram_download_button.clicked.connect(self.save_image)
         self.ui.button_histogram_go_back.clicked.connect(self.go_back)
 
+        # Spatial filtering buttons
+        self.ui.button_convolution.clicked.connect(self.open_convolution_apply)
+        self.ui.button_mean.clicked.connect(self.open_mean_filter_apply)
+        self.ui.button_gaussian.clicked.connect(self.open_gaussian_smoothing_filter_apply)
+        self.ui.button_median.clicked.connect(self.open_median_filter_apply)
+        self.ui.button_laplacian.clicked.connect(self.open_laplacian_filter_apply)
+        self.ui.button_highboost.clicked.connect(self.open_highboost_filter_apply)
+        self.ui.button_sobel.clicked.connect(self.open_sobel_apply)
+        self.ui.button_magnitude_gradient.clicked.connect(self.open_magnitude_gradient_apply)
+        self.ui.toggle_spatial_button.clicked.connect(lambda: self.toggle_button(self.ui.spatial_filtering_menu))
+        self.ui.button_spatial_go_back.clicked.connect(self.go_back)
+        self.ui.spatial_download_button.clicked.connect(self.save_image)
+
+        # Geometric operations buttons
+        self.ui.toggle_geometric_button.clicked.connect(lambda: self.toggle_button(self.ui.geometric_operations_menu))
+        self.ui.scaling_button.clicked.connect(self.open_scaling_apply)
+        self.ui.geometric_download_button.clicked.connect(self.save_image)
+        self.ui.button_geometric_go_back.clicked.connect(self.go_back)
+
+        self.ui.rotating_button.clicked.connect(self.open_rotating_apply)
+        
+        # Frequency domain buttons
+        self.ui.toggle_frequency_button.clicked.connect(lambda: self.toggle_button(self.ui.frequency_algorithms_menu))
+        self.ui.button_dft.clicked.connect(self.open_dft_apply)
+        self.ui.button_fft_apply.clicked.connect(self.open_fft_apply)
+        self.ui.frequency_download_button.clicked.connect(self.save_image)
+        self.ui.button_frequency_go_back.clicked.connect(self.go_back)
+
+        # Colors algorithms buttons
+        self.ui.toggle_color_button.clicked.connect(lambda: self.toggle_button(self.ui.colors_algorithms_menu))
+        self.ui.button_get_hsi.clicked.connect(self.open_rgb_hsi)
+        self.ui.button_grayscale_mean.clicked.connect(self.open_grayscale_mean_color_apply)
+        self.ui.button_grayscale_weighted_mean.clicked.connect(self.open_grayscale_weighted_apply)
+        self.ui.button_rgb_negative.clicked.connect(self.open_negative_rgb)
+        self.ui.button_chroma_key.clicked.connect(self.open_chroma_key)
+        self.ui.button_adjust_hsi.clicked.connect(self.open_adjust_hsi_channels_apply)
+        self.ui.button_adjust_color_balance.clicked.connect(self.open_adjust_color_balance_apply)
+        self.ui.button_sepia_filter.clicked.connect(self.open_adjust_sepia_apply)
+        self.ui.button_colors_go_back.clicked.connect(self.go_back)
+        self.ui.button_colors_download_button.clicked.connect(self.save_image)  
+
         # Showing the GUI
         self.show()
 
@@ -65,11 +111,22 @@ class MainWindow(QMainWindow):
         self.ui.toggle_button3.clicked.connect(self.random_image_select)
         self.ui.config_button.clicked.connect(self.help)
         self.ui.select_part_window_ui.pushButton.clicked.connect(self.ui.select_part_window.accept)
+        self.ui.sobel_apply_window_ui.pushButton.clicked.connect(self.ui.sobel_apply_window.accept)
+        self.ui.scaling_apply_window_ui.pushButton.clicked.connect(self.ui.scaling_apply_window.accept)
+        # self.ui.histogram_window_ui.pushButton.clicked.connect(self.ui.histogram_window.accept)
+        
+        self.ui.ui_pages.label.mousePressEvent = self.get_image_coords
+        self.ui.ui_pages.label_2.mousePressEvent = self.get_image_coords
 
         self.button_list = [self.ui.button_thresholding, self.ui.button_negative, self.ui.button_brightness, self.ui.button_logarithm_transformation, self.ui.button_power_law,
                                        self.ui.button_contrast_stretching, self.ui.button_intensity_level_slicing, self.ui.button_bit_plane_slicing,
                                        self.ui.button_steganography_apply, self.ui.button_steganography_undo, self.ui.config_button, self.ui.toggle_button, self.ui.toggle_button2, 
-                                       self.ui.toggle_button3]
+                                       self.ui.toggle_button3, self.ui.button_convolution, self.ui.button_mean, self.ui.button_gaussian, 
+                                       self.ui.button_median, self.ui.button_laplacian, self.ui.button_highboost, 
+                                       self.ui.button_sobel, self.ui.button_magnitude_gradient, self.ui.toggle_spatial_button]
+
+        self.waiting_for_rotation_click = False
+        self.rotation_angle = 0
 
         # Some config buttons behavior
     def help(self):
@@ -86,6 +143,22 @@ class MainWindow(QMainWindow):
         self.ui.main_layout.removeWidget(self.ui.equalization_hist_menu)
         self.ui.equalization_hist_menu.hide()
 
+        # Removing the spatial filtering menu
+        self.ui.main_layout.removeWidget(self.ui.spatial_filtering_menu)
+        self.ui.spatial_filtering_menu.hide()
+
+        # Removing the geometric operations menu
+        self.ui.main_layout.removeWidget(self.ui.geometric_operations_menu)
+        self.ui.geometric_operations_menu.hide()
+
+        # Removing the frequency domain menu
+        self.ui.main_layout.removeWidget(self.ui.frequency_algorithms_menu)
+        self.ui.frequency_algorithms_menu.hide()
+
+        # Removing the colors algorithms menu
+        self.ui.main_layout.removeWidget(self.ui.colors_algorithms_menu)
+        self.ui.colors_algorithms_menu.hide()
+
         # Adding the left menu layout
         self.ui.main_layout.insertWidget(0, self.ui.left_menu)
         self.ui.left_menu.show()
@@ -100,7 +173,7 @@ class MainWindow(QMainWindow):
         menu_width = menu.width()
         width = 50
         if (menu_width == 50):
-            width = 250
+            width = 300
 
         self.animation = QPropertyAnimation(menu, b"minimumWidth")
         self.animation.setStartValue(menu_width)
@@ -120,13 +193,10 @@ class MainWindow(QMainWindow):
 
             # Reading the image
             load_image = QImage(file_path)
-
-            # Converting to grayscale
-            load_image = load_image.convertToFormat(QImage.Format.Format_Grayscale8)
             load_image = QPixmap.fromImage(load_image)
 
             # Applying scale
-            load_image = load_image.scaled(700, 700, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
+            load_image = self.resize_image_display(load_image)
 
             # Changing the label and showing the image to the user
             self.ui.ui_pages.label_2.setPixmap(load_image)
@@ -147,11 +217,13 @@ class MainWindow(QMainWindow):
 
             # Reading the image
             random_image = QPixmap(image_path)
-            random_image = random_image.scaled(700, 700, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
+            random_image = self.resize_image_display(random_image)
 
             # Changing the label and showing the image to the user
             self.ui.ui_pages.label.setPixmap(random_image)
             self.ui.pages.setCurrentWidget(self.ui.ui_pages.page3)
+
+            self.select_algorithms(image_path)
 
             # Going to transformation function
     # Function to save the images
@@ -185,12 +257,69 @@ class MainWindow(QMainWindow):
         self.ui.left_menu.hide()
         self.ui.main_layout.insertWidget(0, self.ui.equalization_hist_menu)
         self.ui.equalization_hist_menu.show()
-
         self.matrix = conversion_to_matrix(img_path)
-        converted_matrix = histogram_equalization(self.matrix)
+
+        # Executing histogram window
+        if (self.ui.histogram_window.exec()):
+
+            if (self.ui.histogram_window_ui.radioButton.isChecked()):
+                self.matrix = conversion_to_matrix(img_path, "L")
+                converted_matrix = histogram_equalization(self.matrix)
+                QTimer.singleShot(2000, lambda: calculate_histogram(self.matrix, title = "Histograma antes da equalização", generate_graph = True))
+                QTimer.singleShot(2000, lambda: calculate_histogram(converted_matrix, title = "Histograma depois da equalização", generate_graph = True))
+            elif (self.ui.histogram_window_ui.radioButton_2.isChecked()):
+                converted_matrix = rgb_histogram_equalization(self.matrix)
+                QTimer.singleShot(2000, lambda: rgb_histogram(self.matrix, title = "Histograma de distribuição de cores", generate_graph = True))
+                QTimer.singleShot(2000, lambda: rgb_histogram(converted_matrix, title = "Histograma de distribuição de cores depois da equalização", generate_graph = True))
         self.apply_transformation(converted_matrix)
-        QTimer.singleShot(2000, lambda: calculate_histogram(self.matrix, title = "Histograma antes da equalização", generate_graph = True))
-        QTimer.singleShot(2000, lambda: calculate_histogram(converted_matrix, title = "Histograma depois da equalização", generate_graph = True))
+
+    def apply_spatial_filtering(self, img_path):
+
+        # Adding spatial filtering
+        self.ui.main_layout.removeWidget(self.ui.left_menu)
+        self.ui.left_menu.hide()
+        self.ui.main_layout.insertWidget(0, self.ui.spatial_filtering_menu)
+        self.ui.spatial_filtering_menu.show()
+
+        # Reading the image
+        self.matrix = conversion_to_matrix(img_path)
+        self.final_image = conversion_to_image(self.matrix)
+
+    def apply_geometric_operations(self, img_path):
+
+        # Adding frequency domain
+        self.ui.main_layout.removeWidget(self.ui.left_menu)
+        self.ui.left_menu.hide()
+        self.ui.main_layout.insertWidget(0, self.ui.geometric_operations_menu)
+        self.ui.geometric_operations_menu.show()
+
+        # Reading the image
+        self.matrix = conversion_to_matrix(img_path)
+        self.final_image = conversion_to_image(self.matrix)
+
+    def apply_frequency_domain(self, img_path):
+
+        # Adding frequency domain
+        self.ui.main_layout.removeWidget(self.ui.left_menu)
+        self.ui.left_menu.hide()
+        self.ui.main_layout.insertWidget(0, self.ui.frequency_algorithms_menu)
+        self.ui.frequency_algorithms_menu.show()
+
+        # Reading the image
+        self.matrix = conversion_to_matrix(img_path)
+        self.final_image = conversion_to_image(self.matrix)
+
+    def apply_colors_algorithms(self, img_path):
+
+        # Adding colors
+        self.ui.main_layout.removeWidget(self.ui.left_menu)
+        self.ui.left_menu.hide()
+        self.ui.main_layout.insertWidget(0, self.ui.colors_algorithms_menu)
+        self.ui.colors_algorithms_menu.show()
+
+        # Reading the image
+        self.matrix = conversion_to_matrix(img_path)
+        self.final_image = conversion_to_image(self.matrix)
 
     def active_button(self, selected_button):
 
@@ -217,7 +346,20 @@ class MainWindow(QMainWindow):
                 self.apply_histogram(file_path)
 
             elif (self.ui.select_part_window_ui.radioButton_3.isChecked()):
-                print("3")
+
+                # Going to spatial_filtering function
+                self.apply_spatial_filtering(file_path)
+
+            elif (self.ui.select_part_window_ui.radioButton_4.isChecked()):
+                self.apply_geometric_operations(file_path)
+
+            elif (self.ui.select_part_window_ui.radioButton_5.isChecked()):
+
+                # Going to frequency domain function
+                self.apply_frequency_domain(file_path)
+
+            elif (self.ui.select_part_window_ui.radioButton_6.isChecked()):
+                self.apply_colors_algorithms(file_path)
 
     # applying the transformations
     # thresholding
@@ -392,9 +534,483 @@ class MainWindow(QMainWindow):
         self.final_image = conversion_to_image(converted_matrix)
         self.final_image = ImageQt(self.final_image)
         self.final_image = QPixmap.fromImage(self.final_image)
-        self.final_image_show = self.final_image.scaled(700, 700, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
+        self.final_image_show = self.resize_image_display(self.final_image)
         self.ui.ui_pages.label_2.setPixmap(self.final_image_show)
+
+    # Spatial filtering algorithms
+    # Convolution
+    def open_convolution_apply(self):
+
+        self.active_button(self.ui.button_convolution)
+
+        # Executing the convolution window
+        if (self.ui.convolution_apply_window.exec()):
+
+            # Taking the value
+            T = self.ui.convolution_apply_window_ui.lineEdit.text()
+
+            try:
+                T = int(T)
+                matrix_dialog = ConvolutionMatrixDialog(T, self)
+
+                if matrix_dialog.exec():
+                    kernel = matrix_dialog.get_matrix()
+                    converted_matrix = convolution(self.matrix, kernel)
+                    print("Pronto!")
+                    self.apply_transformation(converted_matrix)
+
+            except ValueError:
+                print("Erro de valor!")
+            
+    # Mean filter
+    def open_mean_filter_apply(self):
+
+        self.active_button(self.ui.button_mean)
+
+        # Executing the mean window
+        if (self.ui.mean_filter_apply_window.exec()):
+
+            # Taking the value
+            T = self.ui.mean_filter_apply_window_ui.lineEdit.text()
+
+            try:
+                T = int(T)
+                converted_matrix = mean_filter(self.matrix, T)
+                print("Pronto!")
+                self.apply_transformation(converted_matrix)
+            except ValueError:
+                print("O valor deve ser inteiro")
+                return
+
+    # Gaussian smoothing filter
+    def open_gaussian_smoothing_filter_apply(self):
         
+        self.active_button(self.ui.button_gaussian)
+
+        if (self.ui.gaussian_smoothing_apply_window.exec()):
+
+            # Taking the values
+            kernel_size = self.ui.gaussian_smoothing_apply_window_ui.lineEdit.text()
+            standard_deviation = self.ui.gaussian_smoothing_apply_window_ui.lineEdit_2.text()
+
+            try:
+                kernel_size = int(kernel_size)
+                standard_deviation = float(standard_deviation)
+                converted_matrix = gaussian_smoothing(self.matrix, kernel_size, standard_deviation)
+                print("Pronto!")
+                self.apply_transformation(converted_matrix)
+            except ValueError:
+                print("Os valores devem ser inteiro e decimal, respectivamente")
+                return 
+
+    # Median Filter
+    def open_median_filter_apply(self):
+
+        self.active_button(self.ui.button_median)
+
+        # Executing the median window
+        if (self.ui.median_filter_apply_window.exec()):
+
+            # Taking the value
+            T = self.ui.median_filter_apply_window_ui.lineEdit.text()
+
+            try:
+                T = int(T)
+                converted_matrix = median_filter(self.matrix, T)
+                print("Pronto!")
+                self.apply_transformation(converted_matrix)
+            except ValueError:
+                print("O valor deve ser inteiro")
+                return
+
+    # Laplacian filter
+    def open_laplacian_filter_apply(self):
+
+        self.active_button(self.ui.button_laplacian)
+
+        # Executing laplacian window
+        if (self.ui.laplacian_filter_apply_window.exec()):
+
+            # Taking the radio value
+            if (self.ui.laplacian_filter_apply_window_ui.radioButton.isChecked()):
+                kernel = 1
+            elif (self.ui.laplacian_filter_apply_window_ui.radioButton_2.isChecked()):
+                kernel = 2
+            elif (self.ui.laplacian_filter_apply_window_ui.radioButton_3.isChecked()):
+                kernel = 3
+            elif (self.ui.laplacian_filter_apply_window_ui.radioButton_4.isChecked()):
+                kernel = 4
+
+            if (self.ui.laplacian_filter_apply_window_ui.radioButton_5.isChecked()):
+                log = True
+            elif (self.ui.laplacian_filter_apply_window_ui.radioButton_6.isChecked()):
+                log = False
+
+            dimension_log = self.ui.laplacian_filter_apply_window_ui.lineEdit.text()
+            standard_deviation_log = self.ui.laplacian_filter_apply_window_ui.lineEdit_2.text()
+
+            if (log):
+                try:
+                    dimension_log = int(dimension_log)
+                    standard_deviation_log = float(standard_deviation_log)
+                except ValueError:
+                    print("Os valores devem ser números!")
+            else:
+                dimension_log = 0
+                standard_deviation_log = 0
+
+
+            converted_matrix = laplacian(self.matrix, kernel, dimension_log, standard_deviation_log, log)
+            print("Pronto!")
+            self.apply_transformation(converted_matrix)
+
+    # High boost filter
+    def open_highboost_filter_apply(self):
+
+        self.active_button(self.ui.button_highboost)
+
+        # Executing highboost window
+        if (self.ui.high_boost_filter_apply_window.exec()):
+
+            # Taking the values
+            gauss_dimension_filter = self.ui.high_boost_filter_apply_window_ui.lineEdit.text()
+            gauss_standard_deviation = self.ui.high_boost_filter_apply_window_ui.lineEdit_2.text()
+            k = self.ui.high_boost_filter_apply_window_ui.lineEdit_3.text()
+
+            try:
+                gauss_dimension_filter = int(gauss_dimension_filter)
+                gauss_standard_deviation = float(gauss_standard_deviation)
+                k = float(k)
+                converted_matrix = high_boost(self.matrix, gauss_dimension_filter, gauss_standard_deviation, k)
+                print("Pronto!")
+                self.apply_transformation(converted_matrix)
+            except ValueError:
+                print("Os valores devem ser inteiro, float e float, respectivamente")
+                return
+
+    # Sobel
+    def open_sobel_apply(self):
+
+        self.active_button(self.ui.button_sobel)
+
+        # Executing sobel window
+        if (self.ui.sobel_apply_window.exec()):
+
+            # Taking the raio value
+            if (self.ui.sobel_apply_window_ui.radioButton.isChecked()):
+                converted_matrix = sobel(self.matrix, 'x')
+            elif (self.ui.sobel_apply_window_ui.radioButton_2.isChecked()):
+                converted_matrix = sobel(self.matrix, 'y')
+
+            # Applying the algorith result
+            print("Pronto!")
+            self.apply_transformation(converted_matrix)
+
+
+    # Magnitude gradient
+    def open_magnitude_gradient_apply(self):
+
+        self.active_button(self.ui.button_magnitude_gradient)
+
+        # Applying the algorithm
+        converted_matrix = magnitude_gradient(self.matrix)
+        print("Pronto!")
+        self.apply_transformation(converted_matrix)
+
+    # Geometric operations
+    def open_scaling_apply(self):
+
+        self.active_button(self.ui.scaling_button)
+
+        # Executing scaling window
+        if (self.ui.scaling_apply_window.exec()):
+
+            # Selecting the alg type
+            if (self.ui.scaling_apply_window_ui.radioButton.isChecked()):
+                alg_type = 'nearest'
+            elif (self.ui.scaling_apply_window_ui.radioButton_2.isChecked()):
+                alg_type = 'bilinear'
+
+            try:
+                # Taking the values
+                sx = float(self.ui.scaling_apply_window_ui.lineEdit.text())
+                sy = float(self.ui.scaling_apply_window_ui.lineEdit_2.text())
+                converted_matrix = scaling(self.matrix, sx, sy, alg_type)
+                print("Pronto!")
+                self.apply_transformation(converted_matrix)
+
+            except ValueError as e:
+                print("Os valores de sx e sy devem ser floats!")
+
+    # Rotating
+    def open_rotating_apply(self):
+
+        self.active_button(self.ui.rotating_button)
+
+        # Executing rotating window
+        if (self.ui.rotating_apply_window.exec()):
+
+            T = self.ui.rotating_apply_window_ui.lineEdit.text()
+
+            try:
+                self.rotation_angle = int(T)
+                self.waiting_for_rotation_click = True
+                self.ui.ui_pages.label_2.setCursor(Qt.CursorShape.CrossCursor)
+            except ValueError:
+                print("O angulo deve ser um numero!")
+
+    # Frequency domain filters
+    # DFT
+    def open_dft_apply(self):
+
+        self.active_button(self.ui.button_dft)
+
+        # Taking the image dimensions
+        rows = self.matrix.shape[0]
+        columns = self.matrix.shape[1]
+        operations = (rows**2) * (columns**2) 
+
+        message = f"Provavelmente a execução deste algoritmo não vai terminar... \nA imagem tem {rows} linhas e {columns} colunas! \n Serão realizadas {operations} operações!"
+                  
+        self.ui.dft_apply_window_ui.retranslateUi(self.ui.dft_apply_window, message)
+        self.ui.dft_apply_window.exec()
+
+        real_matrix, imaginary_matrix = discrete_fourier_transform(self.matrix)
+
+    # Apply fft
+    def open_fft_apply(self):
+
+        self.active_button(self.ui.button_fft_apply)
+
+        # Obtaining the result matrices
+        real_matrix, imaginary_matrix = fast_fourier_transform(self.matrix)
+
+        # Applying the result
+        converted_matrix, _ = get_result_image(real_matrix, imaginary_matrix)
+        print("Pronto!")
+        self.apply_transformation(converted_matrix)
+
+    # Colors algorithms
+    def open_rgb_hsi(self):
+
+        self.active_button(self.ui.button_get_hsi)
+
+        self.H, self.S, self.I = convert_rgb_to_hsi(self.matrix)
+
+        images_data = [
+            (self.H, "Canal H (Matiz)"),
+            (self.S, "Canal S (Saturação)"),
+            (self.I, "Cancal I (Intensidade)")
+        ]
+
+        results_dialog = HSIDialog(images_data, self)
+        results_dialog.exec()
+
+    # Grayscale Mean filter
+    def open_grayscale_mean_color_apply(self):
+
+        self.active_button(self.ui.button_grayscale_mean)
+
+        # Applying the function
+        converted_matrix = gray_scale_mean(self.matrix)
+        print("Pronto!")
+        self.apply_transformation(converted_matrix)
+
+    # Grayscale weighted mean filter
+    def open_grayscale_weighted_apply(self):
+
+        self.active_button(self.ui.button_grayscale_weighted_mean)
+
+        # Open the window
+        if (self.ui.grayscale_weighted_mean_apply_window.exec()):
+
+            # Taking the values
+            wred = self.ui.grayscale_weighted_mean_apply_window_ui.lineEdit.text()
+            wgreen = self.ui.grayscale_weighted_mean_apply_window_ui.lineEdit_2.text()
+            wblue = self.ui.grayscale_weighted_mean_apply_window_ui.lineEdit_3.text()
+
+            if (wred.strip() == ""):
+                wred = 0.299
+            if (wgreen.strip() == ""):
+                wgreen = 0.587
+            if (wblue.strip() == ""):
+                wblue = 0.114
+
+            # Applying the function
+            try:
+                wred = float(wred)
+                wgreen = float(wgreen)
+                wblue = float(wblue)
+                converted_matrix = gray_scale_weigthted_arithmetic_mean(self.matrix, wred, wgreen, wblue)
+                print("Pronto!")
+                self.apply_transformation(converted_matrix)
+            except ValueError:
+                print("Os valores devem ser numeros!")
+
+    # Negative
+    def open_negative_rgb(self):
+
+        self.active_button(self.ui.button_rgb_negative)
+
+        # Executing the negative dialog
+        if (self.ui.negative_color_window.exec()):
+
+            # Taking the value
+            L = self.ui.negative_color_window_ui.lineEdit.text()
+            
+            try:
+                L = float(L)
+                converted_matrix = rgb_negative(self.matrix, L)
+                self.apply_transformation(converted_matrix)
+            except ValueError:
+                if (L.strip() != ""):
+                    print("O valor deve ser um número")
+                    return
+                converted_matrix = rgb_negative(self.matrix)
+                self.apply_transformation(converted_matrix)
+
+    # Chroma key
+    def open_chroma_key(self):
+
+        self.active_button(self.ui.button_chroma_key)
+
+        # Executing chromakey window
+        if (self.ui.chroma_key_window.exec()):
+
+            r = self.ui.chroma_key_window_ui.lineEdit.text()
+            g = self.ui.chroma_key_window_ui.lineEdit_2.text()
+            b = self.ui.chroma_key_window_ui.lineEdit_3.text()
+            tol = self.ui.chroma_key_window_ui.lineEdit_4.text()
+
+            try:
+                r = int(r)
+                g = int(g)
+                b = int(b)
+                tol = float(tol)
+
+                back_image_path, _ = QFileDialog.getOpenFileName(self, "Selecione a imagem de fundo", "", "Imagens (*.png *.jpg *.jpeg *.bmp)")    
+
+                if (back_image_path):
+                    back_image = conversion_to_matrix(back_image_path)
+                    converted_matrix = chroma_key(self.matrix, back_image, color_vector = [r, g, b], tol = tol)
+                    print("Pronto!")
+                    self.apply_transformation(converted_matrix)         
+
+            except ValueError:
+                print("Os valores devem ser int, int, int e float, respectivamente!")
+
+    # Adjust HSI
+    def open_adjust_hsi_channels_apply(self):
+
+        self.active_button(self.ui.button_adjust_hsi)
+
+        # Executing color adjust window
+        if (self.ui.adjust_hsi_channels_window.exec()):
+
+            # Taking the values
+            shift_h = self.ui.adjust_hsi_channels_window_ui.lineEdit.text()
+            shift_s = self.ui.adjust_hsi_channels_window_ui.lineEdit_2.text()
+            shift_i = self.ui.adjust_hsi_channels_window_ui.lineEdit_3.text()
+
+            if (shift_h.strip() == ""):
+                shift_h = 0.0
+            if (shift_s.strip() == ""):
+                shift_s = 0.0
+            if (shift_i.strip() == ""):
+                shift_i = 0.0
+
+            try:
+                shift_h = float(shift_h)
+                shift_s = float(shift_s)
+                shift_i = float(shift_i)
+
+                converted_matrix = adjust_color_balance(self.matrix, shift_h, shift_s, shift_i)
+                print("Pronto!")
+                self.apply_transformation(converted_matrix)
+
+            except ValueError:
+                print("Os valores devem ser números!")
+
+    def open_adjust_sepia_apply(self):
+
+        self.active_button(self.ui.button_sepia_filter)
+
+        # Applying sepia filter
+        converted_matrix = sepia_rgb(self.matrix)
+        print("Pronto!")
+        self.apply_transformation(converted_matrix)
+
+    # Adjust color balance
+    def open_adjust_color_balance_apply(self):
+
+        self.active_button(self.ui.button_adjust_color_balance)
+
+        # Executing color adjust window
+        if (self.ui.adjust_color_balance_window.exec()):
+
+            # Taking the values
+            shift_cr = self.ui.adjust_color_balance_window_ui.lineEdit.text()
+            shift_mg = self.ui.adjust_color_balance_window_ui.lineEdit_2.text()
+            shift_yb = self.ui.adjust_color_balance_window_ui.lineEdit_3.text()
+
+            if (shift_cr.strip() == ""):
+                shift_cr = 0.0
+            if (shift_mg.strip() == ""):
+                shift_mg = 0.0
+            if (shift_yb.strip() == ""):
+                shift_yb = 0.0
+
+            try:
+                shift_cr = float(shift_cr)
+                shift_mg = float(shift_mg)
+                shift_yb = float(shift_yb)
+
+                converted_matrix = adjust_color_balance(self.matrix, shift_cr, shift_mg, shift_yb)
+                print("Pronto!")
+                self.apply_transformation(converted_matrix)
+
+            except ValueError:
+                print("Os valores devem ser números!")
+
+    def get_image_coords(self, event):
+
+        if (event.button() == Qt.MouseButton.LeftButton):
+
+            label = self.ui.ui_pages.label_2
+            pixmap = label.pixmap()
+
+            if (pixmap is None or not hasattr(self, 'matrix')):
+                return
+
+            original_height, original_width = self.matrix.shape[:2]
+
+            disp_width = pixmap.width()
+            disp_height = pixmap.height()
+
+            offset_x = (label.width() - disp_width) // 2
+            offset_y = (label.height() - disp_height) // 2
+
+            click_x = event.pos().x() - offset_x
+            click_y = event.pos().y() - offset_y
+
+            if (0 <= click_x < disp_width and 0 <= click_y < disp_height):
+                original_x = int(click_x * (original_width / disp_width))
+                original_y = int(click_y * (original_height / disp_height))
+                pixel_value = self.matrix[original_y, original_x]
+
+                if self.waiting_for_rotation_click:
+                    converted_matrix = rotation(self.matrix, self.rotation_angle, original_x, original_y)
+                    self.apply_transformation(converted_matrix)
+                    self.waiting_for_rotation_click = False
+                    self.ui.ui_pages.label_2.unsetCursor()
+
+    # Function to resize the image according to display  
+    def resize_image_display(self, pixmap: QPixmap) -> QPixmap:
+
+        if (pixmap.width() > 700 or pixmap.height() > 700):
+            return pixmap.scaled(700, 700, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
+        return pixmap
+
 # main
 def main():
     myappid = 'davi.calopimage.app.1' 

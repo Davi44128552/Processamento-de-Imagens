@@ -16,6 +16,12 @@ import gui.dialogs.message_dialog as response
 import gui.dialogs.dialog_three_input as three_input
 import gui.dialogs.message_dialog as message_dialog
 import gui.dialogs.dialog_method_select as dialog_method_select
+import gui.dialogs.dialog_two_input as two_input
+import gui.dialogs.radio_select_two_options as two_radio
+import gui.dialogs.scaling_dialog as scaling_dialog
+import gui.dialogs.dialog_laplacian as dialog_laplacian
+import gui.dialogs.dialog_chroma_key as dialog_chroma
+import gui.dialogs.histogram_dialog as histogram_dialog
 
 # Path to select images
 app_path = os.path.abspath(os.getcwd())
@@ -92,7 +98,7 @@ class UI_MainWindow(object):
         self.left_menu_bottom_layout.addWidget(self.config_button)
 
         # Label version
-        self.left_menu_version = QLabel("v1.1.0")
+        self.left_menu_version = QLabel("v1.2.0")
         self.left_menu_version.setAlignment(Qt.AlignCenter)
         self.left_menu_version.setMaximumHeight(30)
         self.left_menu_version.setMinimumHeight(30)
@@ -126,9 +132,53 @@ class UI_MainWindow(object):
         self.transformation_menu_layout.setContentsMargins(0, 0, 0, 0)
         self.transformation_menu_layout.setSpacing(0)
 
+        # Adding the spatial filtering frame
+        self.spatial_filtering_menu = QFrame()
+        self.spatial_filtering_menu.setStyleSheet("background-color: #44475a")
+        self.spatial_filtering_menu.setMaximumWidth(50)
+        self.spatial_filtering_menu.setMinimumWidth(50)
+
+        # Spatial filtering left menu layout
+        self.spatial_filtering_menu_layout = QVBoxLayout(self.spatial_filtering_menu)
+        self.spatial_filtering_menu_layout.setContentsMargins(0, 0, 0, 0)
+        self.spatial_filtering_menu_layout.setSpacing(0)
+
+        # Adding geometric operations frame
+        self.geometric_operations_menu = QFrame()
+        self.geometric_operations_menu.setStyleSheet("background-color: #44475a")
+        self.geometric_operations_menu.setMaximumWidth(50)
+        self.geometric_operations_menu.setMinimumWidth(50)
+
+        # Geometric operations left menu layout
+        self.geometric_operations_menu_layout = QVBoxLayout(self.geometric_operations_menu)
+        self.geometric_operations_menu_layout.setContentsMargins(0, 0, 0, 0)
+        self.geometric_operations_menu_layout.setContentsMargins(0, 0, 0, 0)
+
+        # Adding the frequency domain algorithms
+        self.frequency_algorithms_menu = QFrame()
+        self.frequency_algorithms_menu.setStyleSheet("background-color: #44475a")
+        self.frequency_algorithms_menu.setMaximumWidth(50)
+        self.frequency_algorithms_menu.setMinimumWidth(50)
+
+        self.frequency_algorithms_menu_layout = QVBoxLayout(self.frequency_algorithms_menu)
+        self.frequency_algorithms_menu_layout.setContentsMargins(0, 0, 0, 0)
+        self.frequency_algorithms_menu_layout.setSpacing(0)
+
+        # Adding the colors algorithms frame
+        self.colors_algorithms_menu = QFrame()
+        self.colors_algorithms_menu.setStyleSheet("background-color: #44475a")
+        self.colors_algorithms_menu.setMaximumWidth(50)
+        self.colors_algorithms_menu.setMinimumWidth(50)
+
+        # Colors algorithms left menu layout
+        self.colors_algorithms_menu_layout = QVBoxLayout(self.colors_algorithms_menu)
+        self.colors_algorithms_menu_layout.setContentsMargins(0, 0, 0, 0)
+        self.colors_algorithms_menu_layout.setSpacing(0)
+
         # Configuring the buttons
         self.toggle2_button = PyPushButton(text = "Menu", icon_path = "icon_menu.svg")
         self.toggle_histogram_button = PyPushButton(text = "Menu", icon_path = "icon_menu.svg")
+        self.toggle_spatial_button = PyPushButton(text = "Menu", icon_path = "icon_menu.svg")
         self.button_thresholding = PyPushButton(text = "Linearização", icon_path = "icon1.svg")
         self.button_negative = PyPushButton(text = "Negativa", icon_path = "icon2.svg")
         self.button_brightness = PyPushButton(text = "Brilho", icon_path = "icon10.svg")
@@ -144,6 +194,48 @@ class UI_MainWindow(object):
         self.button_transformation_go_back = PyPushButton(text = "Voltar", icon_path = "arrow.svg")
         self.button_histogram_go_back = PyPushButton(text = "Voltar", icon_path = "arrow.svg")
 
+        # Spatial filtering buttons
+        self.toggle_spatial_button = PyPushButton(text = "Menu", icon_path = "icon_menu.svg")
+        self.button_convolution = PyPushButton(text = "Convolução", icon_path = "convolution.svg")
+        self.button_mean = PyPushButton(text = "Suavização da Média", icon_path = "mean.svg")
+        self.button_gaussian = PyPushButton(text = "Gaussiano", icon_path = "gaussian_smoothing.svg")
+        self.button_median = PyPushButton(text = "Suavização da Mediana", icon_path = "median_filter.svg")
+        self.button_laplacian = PyPushButton(text = "Filtro laplaciano", icon_path = "laplacian.svg")
+        self.button_highboost = PyPushButton(text = "Filtro por High-boost", icon_path = "highboost.svg")
+        self.button_sobel = PyPushButton(text = "Sobel", icon_path = "sobel.svg")
+        self.button_magnitude_gradient = PyPushButton(text = "Detecção pelo Gradiente", icon_path = "magnitude_gradient.svg")
+        self.button_spatial_go_back = PyPushButton(text = "Voltar", icon_path = "arrow.svg")
+        self.spatial_download_button = PyPushButton(text = "Baixar Imagem", icon_path = "download.svg")
+
+        # Geometric operations buttons
+        self.toggle_geometric_button = PyPushButton(text = "Menu", icon_path = "icon_menu.svg")
+        self.scaling_button = PyPushButton(text = "Aplicar Escala", icon_path = "scale.svg")
+        self.rotating_button = PyPushButton(text = "Aplicar Rotação", icon_path = "rotate.svg")
+        self.button_geometric_go_back = PyPushButton(text = "Voltar", icon_path = "arrow.svg")
+        self.geometric_download_button = PyPushButton(text = "Baixar Imagem", icon_path = "download.svg")
+
+        # Frequency domain filtering buttons
+        self.toggle_frequency_button = PyPushButton(text = "Menu", icon_path = "icon_menu.svg")
+        self.button_dft = PyPushButton(text = "Transformada Discreta de Fourier", icon_path = "dft.svg")
+        self.button_fft_apply = PyPushButton(text = "Aplicar Transformada Rápida de Fourier", icon_path = "fft.svg")
+        self.button_inverse_fourier = PyPushButton(text = "Transformada Inversa", icon_path = "inverse_fft.svg")
+        self.button_frequency_go_back = PyPushButton(text = "Voltar", icon_path = "arrow.svg")
+        self.frequency_download_button = PyPushButton(text = "Baixar Imagem", icon_path = "download.svg")
+
+        # Colors algorithms
+        self.toggle_color_button = PyPushButton(text = "Menu", icon_path = "icon_menu.svg")
+        self.button_get_hsi = PyPushButton(text = "Converter RGB para HSI", icon_path = "convert.svg")
+        self.button_get_rgb = PyPushButton(text = "Converter HSI para RGB", icon_path = "convert.svg")
+        self.button_grayscale_mean = PyPushButton(text = "Escala de cinza pela média", icon_path = "grayscale_mean.svg")
+        self.button_grayscale_weighted_mean = PyPushButton(text = "Escala de cinza por média ponderada", icon_path = "grayscale_weighted_mean.svg")
+        self.button_rgb_negative = PyPushButton(text = "Negativa RGB", icon_path = "rgb_negative.svg")
+        self.button_chroma_key = PyPushButton(text = "Chroma Key", icon_path = "chroma_key.svg")
+        self.button_adjust_hsi = PyPushButton(text = "Ajustar canais HSI", icon_path = "grayscale_weighted_mean.svg")
+        self.button_adjust_color_balance = PyPushButton(text = "Ajustar balancemanto de cores", icon_path = "grayscale_weighted_mean.svg")
+        self.button_sepia_filter = PyPushButton(text = "Filtro sépia", icon_path = "sepia.svg")
+        self.button_colors_go_back = PyPushButton(text = "Voltar", icon_path = "arrow.svg")
+        self.button_colors_download_button = PyPushButton(text = "Baixar Imagem", icon_path = "download.svg")
+        
         # Adding the buttons to layout
         self.equalization_hist_menu_layout.addWidget(self.toggle_histogram_button)
         self.hist_spacer = QSpacerItem(20, 20, QSizePolicy.Minimum, QSizePolicy.Expanding)
@@ -165,8 +257,49 @@ class UI_MainWindow(object):
         self.transformation_menu_layout.addWidget(self.button_steganography_undo)
         self.transformation_menu_layout.addWidget(self.transformation_download_button)
         self.transformation_menu_layout.addWidget(self.button_transformation_go_back)
-
         self.transformation_menu.hide()
+
+        self.spatial_filtering_menu_layout.addWidget(self.toggle_spatial_button)
+        self.spatial_filtering_menu_layout.addWidget(self.button_convolution)
+        self.spatial_filtering_menu_layout.addWidget(self.button_mean)
+        self.spatial_filtering_menu_layout.addWidget(self.button_gaussian)
+        self.spatial_filtering_menu_layout.addWidget(self.button_median)
+        self.spatial_filtering_menu_layout.addWidget(self.button_laplacian)
+        self.spatial_filtering_menu_layout.addWidget(self.button_highboost)
+        self.spatial_filtering_menu_layout.addWidget(self.button_sobel)
+        self.spatial_filtering_menu_layout.addWidget(self.button_magnitude_gradient)
+        self.spatial_filtering_menu_layout.addWidget(self.spatial_download_button)
+        self.spatial_filtering_menu_layout.addWidget(self.button_spatial_go_back)
+        self.spatial_filtering_menu.hide()
+
+        self.geometric_operations_menu_layout.addWidget(self.toggle_geometric_button)
+        self.geometric_operations_menu_layout.addWidget(self.scaling_button)
+        self.geometric_operations_menu_layout.addWidget(self.rotating_button)
+        self.geometric_operations_menu_layout.addWidget(self.geometric_download_button)
+        self.geometric_operations_menu_layout.addWidget(self.button_geometric_go_back)
+        self.geometric_operations_menu.hide()
+
+        self.frequency_algorithms_menu_layout.addWidget(self.toggle_frequency_button)
+        self.frequency_algorithms_menu_layout.addWidget(self.button_dft)
+        self.frequency_algorithms_menu_layout.addWidget(self.button_fft_apply)
+        self.frequency_algorithms_menu_layout.addWidget(self.button_inverse_fourier)
+        self.frequency_algorithms_menu_layout.addWidget(self.frequency_download_button)
+        self.frequency_algorithms_menu_layout.addWidget(self.button_frequency_go_back)
+        self.frequency_algorithms_menu.hide()
+
+        self.colors_algorithms_menu_layout.addWidget(self.toggle_color_button)
+        self.colors_algorithms_menu_layout.addWidget(self.button_get_hsi)
+        self.colors_algorithms_menu_layout.addWidget(self.button_get_rgb)
+        self.colors_algorithms_menu_layout.addWidget(self.button_grayscale_mean)
+        self.colors_algorithms_menu_layout.addWidget(self.button_grayscale_weighted_mean)
+        self.colors_algorithms_menu_layout.addWidget(self.button_rgb_negative)
+        self.colors_algorithms_menu_layout.addWidget(self.button_chroma_key)
+        self.colors_algorithms_menu_layout.addWidget(self.button_adjust_hsi)
+        self.colors_algorithms_menu_layout.addWidget(self.button_adjust_color_balance)
+        self.colors_algorithms_menu_layout.addWidget(self.button_sepia_filter)
+        self.colors_algorithms_menu_layout.addWidget(self.button_colors_download_button)
+        self.colors_algorithms_menu_layout.addWidget(self.button_colors_go_back)
+        self.colors_algorithms_menu.hide()
 
         # Content
         self.content = QFrame()
@@ -315,4 +448,148 @@ class UI_MainWindow(object):
         self.steganography_decode_window.setStyleSheet("background-color: #44475a; font: 700 11pt 'Segoe UI'; color: white")
         self.steganography_decode_window.setWindowIcon(QPixmap(os.path.normpath(os.path.join(path, "icon9.svg"))))
         self.steganography_decode_window.setWindowTitle("Esteganografia decodificada")
+
+        # Histogram windows
+        self.histogram_window = QDialog()
+        self.histogram_window_ui = histogram_dialog.Ui_Dialog()
+        self.histogram_window_ui.setupUi(self.histogram_window)
+        self.histogram_window.setStyleSheet("background-color: #44475a; font: 700 11pt 'Segoe UI'; color: white")
+        self.histogram_window.setWindowIcon(QPixmap(os.path.normpath(os.path.join(path, ""))))
+        self.histogram_window.setWindowTitle("Histograma")
+
+        # Spatial algorithms windows
+        # Convolution
+        self.convolution_apply_window = QDialog()
+        self.convolution_apply_window_ui = one_input.Ui_Dialog()
+        self.convolution_apply_window_ui.setupUi(self.convolution_apply_window)
+        self.convolution_apply_window_ui.retranslateUi(self.convolution_apply_window, "Escreva o tamanho do kernel", "")
+        self.convolution_apply_window.setStyleSheet("background-color: #44475a; font: 700 11pt 'Segoe UI'; color: white")
+        self.convolution_apply_window.setWindowIcon(QPixmap(os.path.normpath(os.path.join(path, "convolution.svg"))))
+        self.convolution_apply_window.setWindowTitle("Convolução")
+
+        # Mean filter
+        self.mean_filter_apply_window = QDialog()
+        self.mean_filter_apply_window_ui = one_input.Ui_Dialog()
+        self.mean_filter_apply_window_ui.setupUi(self.mean_filter_apply_window)
+        self.mean_filter_apply_window_ui.retranslateUi(self.mean_filter_apply_window, "Escreva o tamanho do kernel", "")
+        self.mean_filter_apply_window.setStyleSheet("background-color: #44475a; font: 700 11pt 'Segoe UI'; color: white")
+        self.mean_filter_apply_window.setWindowIcon(QPixmap(os.path.normpath(os.path.join(path, "mean.svg"))))
+        self.mean_filter_apply_window.setWindowTitle("Filtro de Média")
+
+        # Gaussian smoothing
+        self.gaussian_smoothing_apply_window = QDialog()
+        self.gaussian_smoothing_apply_window_ui = two_input.Ui_Dialog()
+        self.gaussian_smoothing_apply_window_ui.setupUi(self.gaussian_smoothing_apply_window)
+        self.gaussian_smoothing_apply_window_ui.retranslateUi(self.gaussian_smoothing_apply_window, "Escreva o tamanho do kernel", "Escreva o valor do desvio padrão")
+        self.gaussian_smoothing_apply_window.setStyleSheet("background-color: #44475a; font: 700 11pt 'Segoe UI'; color: white")
+        self.gaussian_smoothing_apply_window.setWindowIcon(QPixmap(os.path.normpath(os.path.join(path, "gaussian_smoothing.svg"))))
+        self.gaussian_smoothing_apply_window.setWindowTitle("Filtro Gaussiano")
+
+        # Median filter
+        self.median_filter_apply_window = QDialog()
+        self.median_filter_apply_window_ui = one_input.Ui_Dialog()
+        self.median_filter_apply_window_ui.setupUi(self.median_filter_apply_window)
+        self.median_filter_apply_window_ui.retranslateUi(self.median_filter_apply_window, "Escreva o tamanho do kernel", "")
+        self.median_filter_apply_window.setStyleSheet("background-color: #44475a; font: 700 11pt 'Segoe UI'; color: white")
+        self.median_filter_apply_window.setWindowIcon(QPixmap(os.path.normpath(os.path.join(path, "median_filter.svg"))))
+        self.median_filter_apply_window.setWindowTitle("Filtro de Mediana")
+
+        # Laplacian filter
+        self.laplacian_filter_apply_window = QDialog()
+        self.laplacian_filter_apply_window_ui = dialog_laplacian.Ui_Dialog()
+        self.laplacian_filter_apply_window_ui.setupUi(self.laplacian_filter_apply_window)
+        self.laplacian_filter_apply_window.setStyleSheet("background-color: #44475a; font: 700 11pt 'Segoe UI'; color: white")
+        self.laplacian_filter_apply_window.setWindowIcon(QPixmap(os.path.normpath(os.path.join(path, "laplacian.svg"))))
+        self.laplacian_filter_apply_window.setWindowTitle("Filtro Laplaciano")
+
+        # High boost
+        self.high_boost_filter_apply_window = QDialog()
+        self.high_boost_filter_apply_window_ui = three_input.Ui_Dialog()
+        self.high_boost_filter_apply_window_ui.setupUi(self.high_boost_filter_apply_window)
+        self.high_boost_filter_apply_window_ui.retranslateUi(self.high_boost_filter_apply_window, "Dimensão do filtro gaussiano", "Desvio padrão do filtro de gauss", "Fator de amplificação")
+        self.high_boost_filter_apply_window.setStyleSheet("background-color: #44475a; font: 700 11pt 'Segoe UI'; color: white")
+        self.high_boost_filter_apply_window.setWindowIcon(QPixmap(os.path.normpath(os.path.join(path, "highboots.svg"))))
+        self.high_boost_filter_apply_window.setWindowTitle("Filtro High-boost")
+
+        # Sobel
+        self.sobel_apply_window = QDialog()
+        self.sobel_apply_window_ui = two_radio.Ui_Dialog()
+        self.sobel_apply_window_ui.setupUi(self.sobel_apply_window)
+        self.sobel_apply_window_ui.retranslateUi(self.sobel_apply_window, "Sx", "Sy")
+        self.sobel_apply_window.setStyleSheet("background-color: #44475a; font: 700 11pt 'Segoe UI'; color: white")
+        self.sobel_apply_window.setWindowIcon(QPixmap(os.path.normpath(os.path.join(path, ""))))
+        self.sobel_apply_window.setWindowTitle("Sobel")
+
+        # Geometric operations windows
+        # Scaling
+        self.scaling_apply_window = QDialog()
+        self.scaling_apply_window_ui = scaling_dialog.Ui_Dialog()
+        self.scaling_apply_window_ui.setupUi(self.scaling_apply_window)
+        self.scaling_apply_window.setStyleSheet("background-color: #44475a; font: 700 11pt 'Segoe UI'; color: white")
+        self.scaling_apply_window.setWindowIcon(QPixmap(os.path.normpath(os.path.join(path, "scale.svg"))))
+        self.scaling_apply_window.setWindowTitle("Escala")
+
+        # Rotating
+        self.rotating_apply_window = QDialog()
+        self.rotating_apply_window_ui = one_input.Ui_Dialog()
+        self.rotating_apply_window_ui.setupUi(self.rotating_apply_window)
+        self.rotating_apply_window_ui.retranslateUi(self.rotating_apply_window, "Escreva o ângulo desejado", "0")
+        self.rotating_apply_window.setStyleSheet("background-color: #44475a; font: 700 11pt 'Segoe UI'; color: white")
+        self.rotating_apply_window.setWindowIcon(QPixmap(os.path.normpath(os.path.join(path, "rotate.svg"))))
+        self.rotating_apply_window.setWindowTitle("Rotação")
+
+        # Frequency domain windows
+        # DFT
+        self.dft_apply_window = QDialog()
+        self.dft_apply_window_ui = message_dialog.Ui_Dialog()
+        self.dft_apply_window_ui.setupUi(self.dft_apply_window)
+        self.dft_apply_window.setStyleSheet("background-color: #44475a; font: 700 11pt 'Segoe UI'; color: white")
+        self.dft_apply_window.setWindowIcon(QPixmap(os.path.normpath(os.path.join(path, "dft.svg"))))
+        self.dft_apply_window.setWindowTitle("Transformada Discreta de Fourier")
+
+        # Colors algorithms windows
+        # Weighted mean
+        self.grayscale_weighted_mean_apply_window = QDialog()
+        self.grayscale_weighted_mean_apply_window_ui = three_input.Ui_Dialog()
+        self.grayscale_weighted_mean_apply_window_ui.setupUi(self.grayscale_weighted_mean_apply_window)
+        self.grayscale_weighted_mean_apply_window_ui.retranslateUi(self.grayscale_weighted_mean_apply_window, "Peso do canal R", "Peso do canal G", "Peso do canal B")
+        self.grayscale_weighted_mean_apply_window.setStyleSheet("background-color: #44475a; font: 700 11pt 'Segoe UI'; color: white")
+        self.grayscale_weighted_mean_apply_window.setWindowIcon(QPixmap(os.path.normpath(os.path.join(path, "grayscale_weighted_mean.svg"))))
+        self.grayscale_weighted_mean_apply_window.setWindowTitle("Escala de Cinza pela média ponderada")
+
+        # Color negative
+        self.negative_color_window = QDialog()
+        self.negative_color_window_ui = one_input.Ui_Dialog()
+        self.negative_color_window_ui.setupUi(self.negative_color_window)
+        self.negative_color_window_ui.retranslateUi(self.negative_color_window, "Escreva um valor para L", "")
+        self.negative_color_window.setStyleSheet("background-color: #44475a; font: 700 11pt 'Segoe UI'; color: white")
+        self.negative_color_window.setWindowIcon(QPixmap(os.path.normpath(os.path.join(path, "rgb_negative.svg"))))
+        self.negative_color_window.setWindowTitle("Negativa RGB")
+
+        # Chroma key
+        self.chroma_key_window = QDialog()
+        self.chroma_key_window_ui = dialog_chroma.Ui_Dialog()
+        self.chroma_key_window_ui.setupUi(self.chroma_key_window)
+        self.chroma_key_window.setStyleSheet("background-color: #44475a; font: 700 11pt 'Segoe UI'; color: white")
+        self.chroma_key_window.setWindowIcon(QPixmap(os.path.normpath(os.path.join(path, "chroma_key.svg"))))
+        self.chroma_key_window.setWindowTitle("Chroma Key")
+
+        # Adjust HSI
+        self.adjust_hsi_channels_window = QDialog()
+        self.adjust_hsi_channels_window_ui = three_input.Ui_Dialog()
+        self.adjust_hsi_channels_window_ui.setupUi(self.adjust_hsi_channels_window)
+        self.adjust_hsi_channels_window_ui.retranslateUi(self.adjust_hsi_channels_window, "Deslocamento Hue", "Deslocamento Saturation", "Deslocamento Intensity")
+        self.adjust_hsi_channels_window.setStyleSheet("background-color: #44475a; font: 700 11pt 'Segoe UI'; color: white")
+        self.adjust_hsi_channels_window.setWindowIcon(QPixmap(os.path.normpath(os.path.join(path, "grayscale_weighted_mean.svg"))))
+        self.adjust_hsi_channels_window.setWindowTitle("Ajustar HSI")
+
+        # Adjust_color_balance
+        self.adjust_color_balance_window = QDialog()
+        self.adjust_color_balance_window_ui = three_input.Ui_Dialog()
+        self.adjust_color_balance_window_ui.setupUi(self.adjust_color_balance_window)
+        self.adjust_color_balance_window_ui.retranslateUi(self.grayscale_weighted_mean_apply_window, "Deslocamento CR", "Deslocamento MG", "Deslocamento YB")
+        self.adjust_color_balance_window.setStyleSheet("background-color: #44475a; font: 700 11pt 'Segoe UI'; color: white")
+        self.adjust_color_balance_window.setWindowIcon(QPixmap(os.path.normpath(os.path.join(path, "grayscale_weighted_mean.svg"))))
+        self.adjust_color_balance_window.setWindowTitle("Aplicar ajuste de cores")
+
         parent.setCentralWidget(self.central_frame)

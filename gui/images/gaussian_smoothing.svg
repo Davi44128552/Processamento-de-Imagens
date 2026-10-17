@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="23px" height="23px" viewBox="0 0 23 23" version="1.1">
+<g id="surface1">
+<path style="fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;stroke:rgb(5.098039%,5.098039%,5.098039%);stroke-opacity:1;stroke-miterlimit:4;" d="M 6 14 L 58 14 M 6 25 L 58 25 M 6 36 L 58 36 M 6 47 L 58 47 " transform="matrix(0.359375,0,0,0.359375,0,0)"/>
+<path style="fill-rule:nonzero;fill:rgb(5.098039%,5.098039%,5.098039%);fill-opacity:1;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;stroke:rgb(5.098039%,5.098039%,5.098039%);stroke-opacity:1;stroke-miterlimit:4;" d="M 20 14 C 20 12.347826 18.652174 11 17 11 C 15.347826 11 14 12.347826 14 14 C 14 15.652174 15.347826 17 17 17 C 18.652174 17 20 15.652174 20 14 Z M 20 14 " transform="matrix(0.359375,0,0,0.359375,0,0)"/>
+<path style="fill-rule:nonzero;fill:rgb(5.098039%,5.098039%,5.098039%);fill-opacity:1;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;stroke:rgb(5.098039%,5.098039%,5.098039%);stroke-opacity:1;stroke-miterlimit:4;" d="M 35 25 C 35 23.347826 33.652174 22 32 22 C 30.347826 22 29 23.347826 29 25 C 29 26.652174 30.347826 28 32 28 C 33.652174 28 35 26.652174 35 25 Z M 35 25 " transform="matrix(0.359375,0,0,0.359375,0,0)"/>
+<path style="fill-rule:nonzero;fill:rgb(5.098039%,5.098039%,5.098039%);fill-opacity:1;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;stroke:rgb(5.098039%,5.098039%,5.098039%);stroke-opacity:1;stroke-miterlimit:4;" d="M 49 36 C 49 34.347826 47.652174 33 46 33 C 44.347826 33 43 34.347826 43 36 C 43 37.652174 44.347826 39 46 39 C 47.652174 39 49 37.652174 49 36 Z M 49 36 " transform="matrix(0.359375,0,0,0.359375,0,0)"/>
+<path style="fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;stroke:rgb(5.098039%,5.098039%,5.098039%);stroke-opacity:1;stroke-dasharray:3,3;stroke-miterlimit:4;" d="M 8 56 C 18 56 20 51 28 51 C 36 51 39 56 56 56 " transform="matrix(0.359375,0,0,0.359375,0,0)"/>
+</g>
+</svg>
