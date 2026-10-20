@@ -204,6 +204,21 @@ def adjust_hsi_channels(img_matrix: np.ndarray, shift_h: float = 0.0, scale_s: f
     # Returning the final matrix
     return final_matrix.astype(np.uint8)
 
+# Function to adjust HSI channels
+def adjust_hsi_channels_2(H: np.ndarray, S: np.ndarray, I: np.ndarray, shift_h: float = 0.0, scale_s: float = 1.0, scale_i: float = 1.0) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+
+    # Defining the new values
+    H_output = (H + shift_h) % 360.0
+
+    S_output = S * scale_s
+    S_output = np.clip(S_output, 0.0, 1.0)
+
+    I_output = I * scale_i
+    I_output = np.clip(I_output, 0.0, 1.0)
+
+    # Returning the final matrix
+    return H_output, S_output, I_output
+
 # Function to adjust color balance
 def adjust_color_balance(img_matrix: np.ndarray, shift_cr: float = 0.0, shift_mg: float = 0.0, shift_yb: float = 0.0) -> np.ndarray:
 

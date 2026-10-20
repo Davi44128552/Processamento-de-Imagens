@@ -81,8 +81,12 @@ def get_result_image(real_matrix: np.ndarray, imaginary_matrix: np.ndarray) -> t
 
     # Reconstructing the complex_matrix
     complex_matrix = real_matrix + 1j * imaginary_matrix
-    shifted_complex_matrix = np.fft.fftshift(complex_matrix)
 
+    if (len(complex_matrix.shape) == 3):
+        shifted_complex_matrix = np.fft.fftshift(complex_matrix, axes = (0, 1))
+    else:
+        shifted_complex_matrix = np.fft.fftshift(complex_matrix)
+    
     matrix_magnitude = np.abs(shifted_complex_matrix)
     final_matrix = np.log(1 + matrix_magnitude)
 
@@ -98,8 +102,41 @@ def get_result_image(real_matrix: np.ndarray, imaginary_matrix: np.ndarray) -> t
     # Returning the final matrix
     return final_matrix.astype(np.uint8), shifted_complex_matrix
 
+# Cooley-Tukey algorithm for 1D matrices
+def cooley_tukey(matrix: np.ndarray) -> np.ndarray:
+
+    # Array size
+    array_size = matrix.shape[-1]
+
+    # Cooley-Tukey is a divide and conquer algorithm
+    # Base case
+    if (array_size <= 1):
+        return matrix
+
+    # Dividing the matrix into even and odd indices
+    even_matrix = matrix[..., 0::2]
+    odd_matrix = matrix[..., 1::2]
+
+    # Applying the Cooley-Tukey test recursively to the new matrices
+    even_output = cooley_tukey(even_matrix)
+    odd_output = cooley_tukey(odd_matrix)
+
+    # Conquer: Calculating the Twiddle factors
+    # Defined by e^((-2jpik) / N)
+    factor = np.exp(-2j * np.pi * np.arange(array_size // 2) / array_size)
+
+    # Combining the results
+    first_half = even_output + factor * odd_output
+    second_half = even_output - factor * odd_output
+
+    # Concatenating the results
+    final_matrix = np.concatenate([first_half, second_half], axis = -1)
+
+    # Returning the result
+    return final_matrix
+
 # Function to invert fourier transform
-'''@runs_rgb
+@runs_rgb
 def inverse_fft(shifted_complex_matrix: np.ndarray) -> np.ndarray:
 
     # Undo the shift
@@ -112,13 +149,9 @@ def inverse_fft(shifted_complex_matrix: np.ndarray) -> np.ndarray:
     conjugate_input = complex_matrix.conj()
 
     # Applying the cooley_tukey algorithm
-    rows_output = np.zeros((N, M), dtype = np.complex128)
-    for i in range(0, N):
-        rows_output[i, :] = cooley_tukey(conjugate_input[i, :])
-
-    columns_output = np.zeros((N, M), dtype = np.complex128)
-    for j in range(0, M):
-        columns_output[:, j] = cooley_tukey(rows_output[:, j])
+    rows_output = cooley_tukey(conjugate_input)
+    columns_output = cooley_tukey(rows_output.T)
+    columns_output =columns_output.T
 
     # Calculating the final matrix
     final_matrix = columns_output.conj() / (N * M)
@@ -126,4 +159,4 @@ def inverse_fft(shifted_complex_matrix: np.ndarray) -> np.ndarray:
     final_matrix = np.clip(final_matrix, 0, 255)
 
     # Returning the result matrix
-    return final_matrix.astype(np.uint8)'''
+    return final_matrix.astype(np.uint8)
