@@ -87,12 +87,14 @@ class MainWindow(QMainWindow):
         self.ui.toggle_frequency_button.clicked.connect(lambda: self.toggle_button(self.ui.frequency_algorithms_menu))
         self.ui.button_dft.clicked.connect(self.open_dft_apply)
         self.ui.button_fft_apply.clicked.connect(self.open_fft_apply)
+        self.ui.button_inverse_fourier.clicked.connect(self.open_ifft_apply)
         self.ui.frequency_download_button.clicked.connect(self.save_image)
         self.ui.button_frequency_go_back.clicked.connect(self.go_back)
 
         # Colors algorithms buttons
         self.ui.toggle_color_button.clicked.connect(lambda: self.toggle_button(self.ui.colors_algorithms_menu))
         self.ui.button_get_hsi.clicked.connect(self.open_rgb_hsi)
+        self.ui.button_get_rgb.clicked.connect(self.open_hsi_rgb)
         self.ui.button_grayscale_mean.clicked.connect(self.open_grayscale_mean_color_apply)
         self.ui.button_grayscale_weighted_mean.clicked.connect(self.open_grayscale_weighted_apply)
         self.ui.button_rgb_negative.clicked.connect(self.open_negative_rgb)
@@ -113,10 +115,19 @@ class MainWindow(QMainWindow):
         self.ui.select_part_window_ui.pushButton.clicked.connect(self.ui.select_part_window.accept)
         self.ui.sobel_apply_window_ui.pushButton.clicked.connect(self.ui.sobel_apply_window.accept)
         self.ui.scaling_apply_window_ui.pushButton.clicked.connect(self.ui.scaling_apply_window.accept)
+        self.ui.get_rgb_window_ui.buttonBox.clicked.connect(self.ui.get_rgb_window.accept)
         # self.ui.histogram_window_ui.pushButton.clicked.connect(self.ui.histogram_window.accept)
         
-        self.ui.ui_pages.label.mousePressEvent = self.get_image_coords
-        self.ui.ui_pages.label_2.mousePressEvent = self.get_image_coords
+        self.is_drawning_mask = False
+        self.drawning = False
+        self.last_point = QPoint()
+        self.brush_color = QColor(0, 0, 0)
+        self.brush_size = 10
+        self.mask_image = None
+        
+        self.ui.ui_pages.label_2.mousePressEvent = self.label_mouse_press
+        self.ui.ui_pages.label_2.mouseMoveEvent = self.label_mouse_move
+        self.ui.ui_pages.label_2.mouseReleaseEvent = self.label_mouse_release
 
         self.button_list = [self.ui.button_thresholding, self.ui.button_negative, self.ui.button_brightness, self.ui.button_logarithm_transformation, self.ui.button_power_law,
                                        self.ui.button_contrast_stretching, self.ui.button_intensity_level_slicing, self.ui.button_bit_plane_slicing,
@@ -185,6 +196,7 @@ class MainWindow(QMainWindow):
     # Adding the button function to open a image
     def open_image(self):
 
+        self.is_drawning_mask = False
         self.active_button(self.ui.toggle_button2)
 
         # Opening file selector
@@ -781,13 +793,63 @@ class MainWindow(QMainWindow):
     def open_fft_apply(self):
 
         self.active_button(self.ui.button_fft_apply)
+        self.original_matrix_shape = self.matrix.shape
 
         # Obtaining the result matrices
         real_matrix, imaginary_matrix = fast_fourier_transform(self.matrix)
 
         # Applying the result
-        converted_matrix, _ = get_result_image(real_matrix, imaginary_matrix)
+        converted_matrix, shifted_complex_matrix = get_result_image(real_matrix, imaginary_matrix)
+        self.shifted_complex_matrix = shifted_complex_matrix
+
+        self.is_drawning_mask = True
+        original_height, original_width = shifted_complex_matrix.shape[:2]
+        self.mask_image = QImage(original_width, original_height, QImage.Format.Format_Grayscale8)
+        self.mask_image.fill(QColor(255, 255, 255))
+        
         print("Pronto!")
+        self.apply_transformation(converted_matrix)
+
+    # Inverse fourier
+    def open_ifft_apply(self):
+
+        if not hasattr(self, 'shifted_complex_matrix' or self.mask_image is None):
+            print("Não há nenhuma matriz fft para aplicar a inversa!")
+            return
+
+        self.active_button(None)
+
+        # Extracting pixels from modified matrix
+        width = self.mask_image.width()
+        height = self.mask_image.height()
+        pointer = self.mask_image.bits()
+        mask_matrix = np.frombuffer(pointer, dtype = np.uint8).reshape((height, width))
+
+        # Normalizing
+        mask_matrix = mask_matrix / 255.0
+
+        # Adjusting masj dimensions
+        if (len(self.shifted_complex_matrix.shape) == 3):
+
+            mask_matrix_expanded = np.expand_dims(mask_matrix, axis = 2)
+            filtered_matrix = self.shifted_complex_matrix * mask_matrix_expanded
+
+        else:
+            filtered_matrix = self.shifted_complex_matrix * mask_matrix
+
+        converted_matrix = inverse_fft(filtered_matrix)
+        print("Pronto!")
+
+        # Removing padding
+        N = self.original_matrix_shape[0]
+        M = self.original_matrix_shape[1]
+
+        if (len(self.original_matrix_shape) == 3):
+            converted_matrix = converted_matrix[:N, :M, :]
+        else:
+            converted_matrix = converted_matrix[:N, :M]
+
+        self.is_drawning_mask = False
         self.apply_transformation(converted_matrix)
 
     # Colors algorithms
@@ -805,6 +867,40 @@ class MainWindow(QMainWindow):
 
         results_dialog = HSIDialog(images_data, self)
         results_dialog.exec()
+        self.ui.get_hsi_window.exec()
+
+    def open_hsi_rgb(self):
+
+        self.active_button(self.ui.button_get_rgb)
+
+        # Executing the window
+        if (self.ui.get_rgb_window.exec()):
+
+            if (self.ui.get_rgb_window_ui.radioButton.isChecked()):
+
+                if (self.ui.get_rgb_window_2.exec()):
+
+                    shift_h = self.ui.get_rgb_window_2_ui.lineEdit.text()
+                    shift_s = self.ui.get_rgb_window_2_ui.lineEdit_2.text()
+                    shift_i = self.ui.get_rgb_window_2_ui.lineEdit_3.text()
+                
+            elif (self.ui.get_rgb_window_ui.radioButton_2.isChecked()):
+                shift_h = 0.0
+                shift_s = 1.0
+                shift_i = 1.0
+
+            try:
+                shift_h = float(shift_h)
+                shift_s = float(shift_s)
+                shift_i = float(shift_i)
+
+                self.H, self.S, self.I = adjust_hsi_channels_2(self.H, self.S, self.I, shift_h, shift_s, shift_i)
+                converted_matrix = convert_hsi_to_rgb(self.H, self.S, self.I)
+                print("Pronto!")
+                self.apply_transformation(converted_matrix)
+
+            except ValueError:
+                print("Os valores devem ser decimais!")
 
     # Grayscale Mean filter
     def open_grayscale_mean_color_apply(self):
@@ -1010,6 +1106,78 @@ class MainWindow(QMainWindow):
         if (pixmap.width() > 700 or pixmap.height() > 700):
             return pixmap.scaled(700, 700, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
         return pixmap
+
+    def label_mouse_press(self, event):
+        if (self.waiting_for_rotation_click):
+            self.get_image_coords(event)
+            return
+
+        if (self.is_drawning_mask and event.button() == Qt.MouseButton.LeftButton):
+            self.drawning = True
+            self.last_point = event.pos()
+
+    def label_mouse_move(self, event):
+        if (self.is_drawning_mask and self.drawning):
+            point = event.pos()
+            self.draw_on_image(self.last_point, point)
+            self.last_point = point
+
+    def label_mouse_release(self, event):
+        if (self.is_drawning_mask and event.button() == Qt.MouseButton.LeftButton):
+            self.drawning = False
+
+    def draw_on_image(self, p1, p2):
+
+        label = self.ui.ui_pages.label_2
+        pixmap = label.pixmap()
+        if (pixmap is None):
+            return
+
+        disp_width = pixmap.width()
+        disp_height = pixmap.height()
+        offset_x = (label.width() - disp_width) // 2
+        offset_y = (label.height() - disp_height) // 2
+
+        pix_p1 = QPoint(p1.x() - offset_x, p1.y() - offset_y)
+        pix_p2 = QPoint(p2.x() - offset_x, p2.y() - offset_y)
+        
+        painter = QPainter(pixmap)
+        pen = QPen(self.brush_color, self.brush_size, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap)
+        painter.setPen(pen)
+        painter.drawLine(pix_p1, pix_p2)
+        painter.end()
+        label.setPixmap(pixmap)
+
+        # Drawning matrix mask
+
+        original_width = self.mask_image.width()
+        original_height = self.mask_image.height()
+
+        def map_point(p_pix):
+            cx = max(0, min(p_pix.x() - offset_x, disp_width - 1))
+            cy = max(0, min(p_pix.y() - offset_y, disp_height - 1))
+            ox = int(cx * (original_width / disp_width))
+            oy = int(cy * (original_height / disp_height))
+            return QPoint(ox, oy)
+
+        op1 = map_point(pix_p1)
+        op2 = map_point(pix_p2)
+
+        scale_x = original_width / disp_width
+        original_brush_size = int(self.brush_size * scale_x)
+
+        painter_mask = QPainter(self.mask_image)
+        pen_mask = QPen(self.brush_color, original_brush_size, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap)
+        painter_mask.setPen(pen_mask)
+        painter_mask.drawLine(op1, op2)
+        painter_mask.end()
+
+    def set_brush_black(self):
+        self.brush_color = QColor(0, 0, 0)
+    def set_brush_white(self):
+        self.brush_color = QColor(255, 255, 255)
+    def set_brush_gray(self):
+        self.brush_color = QColor(128, 128, 128)
 
 # main
 def main():

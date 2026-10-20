@@ -22,6 +22,7 @@ import gui.dialogs.scaling_dialog as scaling_dialog
 import gui.dialogs.dialog_laplacian as dialog_laplacian
 import gui.dialogs.dialog_chroma_key as dialog_chroma
 import gui.dialogs.histogram_dialog as histogram_dialog
+import gui.dialogs.dialog_hsi_to_rgb as dialog_rgb
 
 # Path to select images
 app_path = os.path.abspath(os.getcwd())
@@ -548,6 +549,30 @@ class UI_MainWindow(object):
         self.dft_apply_window.setWindowTitle("Transformada Discreta de Fourier")
 
         # Colors algorithms windows
+        self.get_hsi_window = QDialog()
+        self.get_hsi_window_ui = message_dialog.Ui_Dialog()
+        self.get_hsi_window_ui.setupUi(self.get_hsi_window)
+        self.get_hsi_window_ui.retranslateUi(self.get_hsi_window, "As matrizes H, S e I foram salvas na memória da aplicação!")
+        self.get_hsi_window.setStyleSheet("background-color: #44475a; font: 700 11pt 'Segoe UI'; color: white")
+        self.get_hsi_window.setWindowIcon(QPixmap(os.path.normpath(os.path.join(path, "convert.svg"))))
+        self.get_hsi_window.setWindowTitle("Converter RGB - HSI")
+
+        # HSI -> RGB
+        self.get_rgb_window = QDialog()
+        self.get_rgb_window_ui = dialog_rgb.Ui_Dialog()
+        self.get_rgb_window_ui.setupUi(self.get_rgb_window)
+        self.get_rgb_window.setStyleSheet("background-color: #44475a; font: 700 11pt 'Segoe UI'; color: white")
+        self.get_rgb_window.setWindowIcon(QPixmap(os.path.normpath(os.path.join(path, "convert.svg"))))
+        self.get_rgb_window.setWindowTitle("Converter HSI - RGB")
+
+        self.get_rgb_window_2 = QDialog()
+        self.get_rgb_window_2_ui = three_input.Ui_Dialog()
+        self.get_rgb_window_2_ui.setupUi(self.get_rgb_window_2)
+        self.get_rgb_window_2_ui.retranslateUi(self.get_rgb_window_2, "Deslocamento Hue", "Deslocamento Saturation", "Deslocamento Intensity")
+        self.get_rgb_window_2.setStyleSheet("background-color: #44475a; font: 700 11pt 'Segoe UI'; color: white")
+        self.get_rgb_window_2.setWindowIcon(QPixmap(os.path.normpath(os.path.join(path, "convert.svg"))))
+        self.get_rgb_window_2.setWindowTitle("Converter HSI - RGB")
+
         # Weighted mean
         self.grayscale_weighted_mean_apply_window = QDialog()
         self.grayscale_weighted_mean_apply_window_ui = three_input.Ui_Dialog()
