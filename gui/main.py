@@ -122,9 +122,13 @@ class MainWindow(QMainWindow):
         self.drawning = False
         self.last_point = QPoint()
         self.brush_color = QColor(0, 0, 0)
-        self.brush_size = 10
+        self.brush_size = 7
         self.mask_image = None
-        
+        self.mirror_brush = False
+
+        self.ui.fft_paint_window_ui.buttonGroup.buttonClicked.connect(self.update_size)
+        self.ui.fft_paint_window_ui.buttonGroup_2.buttonClicked.connect(self.update_color)
+        self.ui.fft_paint_window_ui.checkBox.stateChanged.connect(self.update_mirror)
         self.ui.ui_pages.label_2.mousePressEvent = self.label_mouse_press
         self.ui.ui_pages.label_2.mouseMoveEvent = self.label_mouse_move
         self.ui.ui_pages.label_2.mouseReleaseEvent = self.label_mouse_release
@@ -806,6 +810,8 @@ class MainWindow(QMainWindow):
         original_height, original_width = shifted_complex_matrix.shape[:2]
         self.mask_image = QImage(original_width, original_height, QImage.Format.Format_Grayscale8)
         self.mask_image.fill(QColor(255, 255, 255))
+
+        self.ui.fft_paint_window.show()
         
         print("Pronto!")
         self.apply_transformation(converted_matrix)
@@ -817,6 +823,7 @@ class MainWindow(QMainWindow):
             print("Não há nenhuma matriz fft para aplicar a inversa!")
             return
 
+        self.ui.fft_paint_window.hide()
         self.active_button(None)
 
         # Extracting pixels from modified matrix
@@ -1145,6 +1152,12 @@ class MainWindow(QMainWindow):
         pen = QPen(self.brush_color, self.brush_size, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap)
         painter.setPen(pen)
         painter.drawLine(pix_p1, pix_p2)
+
+        if (self.mirror_brush):
+            mirror_pixel1 = QPoint(disp_width - pix_p1.x(), disp_height - pix_p1.y())
+            mirror_pixel2 = QPoint(disp_width - pix_p2.x(), disp_height - pix_p2.y())
+            painter.drawLine(mirror_pixel1, mirror_pixel2)
+
         painter.end()
         label.setPixmap(pixmap)
 
@@ -1170,14 +1183,37 @@ class MainWindow(QMainWindow):
         pen_mask = QPen(self.brush_color, original_brush_size, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap)
         painter_mask.setPen(pen_mask)
         painter_mask.drawLine(op1, op2)
+
+        if (self.mirror_brush):
+            mirror_op1 = map_point(mirror_pixel1)
+            mirror_op2 = map_point(mirror_pixel2)
+            painter_mask.drawLine(mirror_op1, mirror_op2)
+
         painter_mask.end()
 
-    def set_brush_black(self):
-        self.brush_color = QColor(0, 0, 0)
-    def set_brush_white(self):
-        self.brush_color = QColor(255, 255, 255)
-    def set_brush_gray(self):
-        self.brush_color = QColor(128, 128, 128)
+    def update_size(self, button):
+
+        radioButtonSelected = button.text()
+        if (radioButtonSelected == 'Fino'):
+            self.brush_size = 4
+        elif (radioButtonSelected == 'Médio'):
+            self.brush_size = 7
+        elif (radioButtonSelected == 'Grosso'):
+            self.brush_size = 20
+
+    def update_color(self, button):
+
+        radioButtonSelected = button.text()
+        if (radioButtonSelected == 'Preto'):
+            self.brush_color = QColor(0, 0, 0)
+        elif (radioButtonSelected == 'Cinza'):
+            self.brush_color = QColor(128, 128, 128)
+        elif (radioButtonSelected == 'Branco'):
+            self.brush_color = QColor(255, 255, 255)
+
+    def update_mirror(self, state):
+        self.mirror_brush = (state != 0)
+
 
 # main
 def main():

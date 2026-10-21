@@ -23,6 +23,7 @@ import gui.dialogs.dialog_laplacian as dialog_laplacian
 import gui.dialogs.dialog_chroma_key as dialog_chroma
 import gui.dialogs.histogram_dialog as histogram_dialog
 import gui.dialogs.dialog_hsi_to_rgb as dialog_rgb
+import gui.dialogs.paint_dialog as paint
 
 # Path to select images
 app_path = os.path.abspath(os.getcwd())
@@ -547,6 +548,14 @@ class UI_MainWindow(object):
         self.dft_apply_window.setStyleSheet("background-color: #44475a; font: 700 11pt 'Segoe UI'; color: white")
         self.dft_apply_window.setWindowIcon(QPixmap(os.path.normpath(os.path.join(path, "dft.svg"))))
         self.dft_apply_window.setWindowTitle("Transformada Discreta de Fourier")
+
+        # FFT Paint
+        self.fft_paint_window = QDialog()
+        self.fft_paint_window_ui = paint.Ui_Dialog()
+        self.fft_paint_window_ui.setupUi(self.fft_paint_window)
+        self.fft_paint_window.setStyleSheet("background-color: #44475a; font: 700 11pt 'Segoe UI'; color: white")
+        self.fft_paint_window.setWindowIcon(QPixmap(os.path.normpath(os.path.join(path, "fft.svg"))))
+        self.fft_paint_window.setWindowTitle("Transformada Rápida de Fourier")
 
         # Colors algorithms windows
         self.get_hsi_window = QDialog()

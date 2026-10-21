@@ -1,0 +1,103 @@
+# -*- coding: utf-8 -*-
+
+################################################################################
+## Form generated from reading UI file 'designerSfjlec.ui'
+##
+## Created by: Qt User Interface Compiler version 6.11.1
+##
+## WARNING! All changes made in this file will be lost when recompiling UI file!
+################################################################################
+
+from PySide6.QtCore import (QCoreApplication, QDate, QDateTime, QLocale,
+    QMetaObject, QObject, QPoint, QRect,
+    QSize, QTime, QUrl, Qt)
+from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
+    QFont, QFontDatabase, QGradient, QIcon,
+    QImage, QKeySequence, QLinearGradient, QPainter,
+    QPalette, QPixmap, QRadialGradient, QTransform)
+from PySide6.QtWidgets import (QApplication, QButtonGroup, QCheckBox, QDialog,
+    QFrame, QLabel, QRadioButton, QSizePolicy,
+    QWidget)
+
+class Ui_Dialog(object):
+    def setupUi(self, Dialog):
+        if not Dialog.objectName():
+            Dialog.setObjectName(u"Dialog")
+        Dialog.resize(454, 390)
+        self.label = QLabel(Dialog)
+        self.label.setObjectName(u"label")
+        self.label.setGeometry(QRect(20, 30, 171, 21))
+        font = QFont()
+        font.setPointSize(12)
+        self.label.setFont(font)
+        self.radioButton = QRadioButton(Dialog)
+        self.buttonGroup = QButtonGroup(Dialog)
+        self.buttonGroup.setObjectName(u"buttonGroup")
+        self.buttonGroup.addButton(self.radioButton)
+        self.radioButton.setObjectName(u"radioButton")
+        self.radioButton.setGeometry(QRect(20, 70, 89, 20))
+        self.radioButton.setFont(font)
+        self.radioButton_2 = QRadioButton(Dialog)
+        self.buttonGroup.addButton(self.radioButton_2)
+        self.radioButton_2.setObjectName(u"radioButton_2")
+        self.radioButton_2.setGeometry(QRect(20, 100, 89, 20))
+        self.radioButton_2.setFont(font)
+        self.radioButton_3 = QRadioButton(Dialog)
+        self.buttonGroup.addButton(self.radioButton_3)
+        self.radioButton_3.setObjectName(u"radioButton_3")
+        self.radioButton_3.setGeometry(QRect(20, 130, 89, 20))
+        self.radioButton_3.setFont(font)
+        self.line = QFrame(Dialog)
+        self.line.setObjectName(u"line")
+        self.line.setGeometry(QRect(0, 160, 491, 16))
+        self.line.setFrameShape(QFrame.Shape.HLine)
+        self.line.setFrameShadow(QFrame.Shadow.Sunken)
+        self.radioButton_4 = QRadioButton(Dialog)
+        self.buttonGroup_2 = QButtonGroup(Dialog)
+        self.buttonGroup_2.setObjectName(u"buttonGroup_2")
+        self.buttonGroup_2.addButton(self.radioButton_4)
+        self.radioButton_4.setObjectName(u"radioButton_4")
+        self.radioButton_4.setGeometry(QRect(20, 230, 89, 20))
+        self.radioButton_4.setFont(font)
+        self.radioButton_5 = QRadioButton(Dialog)
+        self.buttonGroup_2.addButton(self.radioButton_5)
+        self.radioButton_5.setObjectName(u"radioButton_5")
+        self.radioButton_5.setGeometry(QRect(20, 260, 89, 20))
+        self.radioButton_5.setFont(font)
+        self.label_2 = QLabel(Dialog)
+        self.label_2.setObjectName(u"label_2")
+        self.label_2.setGeometry(QRect(20, 190, 171, 21))
+        self.label_2.setFont(font)
+        self.radioButton_6 = QRadioButton(Dialog)
+        self.buttonGroup_2.addButton(self.radioButton_6)
+        self.radioButton_6.setObjectName(u"radioButton_6")
+        self.radioButton_6.setGeometry(QRect(20, 290, 89, 20))
+        self.radioButton_6.setFont(font)
+        self.line_2 = QFrame(Dialog)
+        self.line_2.setObjectName(u"line_2")
+        self.line_2.setGeometry(QRect(-10, 320, 491, 16))
+        self.line_2.setFrameShape(QFrame.Shape.HLine)
+        self.line_2.setFrameShadow(QFrame.Shadow.Sunken)
+        self.checkBox = QCheckBox(Dialog)
+        self.checkBox.setObjectName(u"checkBox")
+        self.checkBox.setGeometry(QRect(20, 350, 161, 16))
+        self.checkBox.setFont(font)
+
+        self.retranslateUi(Dialog)
+
+        QMetaObject.connectSlotsByName(Dialog)
+    # setupUi
+
+    def retranslateUi(self, Dialog):
+        Dialog.setWindowTitle(QCoreApplication.translate("Dialog", u"Dialog", None))
+        self.label.setText(QCoreApplication.translate("Dialog", u"Espessura do Pincel", None))
+        self.radioButton.setText(QCoreApplication.translate("Dialog", u"Fino", None))
+        self.radioButton_2.setText(QCoreApplication.translate("Dialog", u"M\u00e9dio", None))
+        self.radioButton_3.setText(QCoreApplication.translate("Dialog", u"Grosso", None))
+        self.radioButton_4.setText(QCoreApplication.translate("Dialog", u"Preto", None))
+        self.radioButton_5.setText(QCoreApplication.translate("Dialog", u"Cinza", None))
+        self.label_2.setText(QCoreApplication.translate("Dialog", u"Cor do Pincel", None))
+        self.radioButton_6.setText(QCoreApplication.translate("Dialog", u"Branco", None))
+        self.checkBox.setText(QCoreApplication.translate("Dialog", u"Espelhar Pincel", None))
+    # retranslateUi
+
