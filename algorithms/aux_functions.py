@@ -7,8 +7,10 @@ from functools import wraps
 # Function that convert image into matrix
 def conversion_to_matrix(file_path: str, matrix_type: str = "RGB") -> np.ndarray:
     image = Image.open(file_path)
-    image = image.convert(matrix_type)
     colors_matrix = np.array(image)
+    if (matrix_type == "L"):
+        from algorithms.colors_algorithms import gray_scale_weigthted_arithmetic_mean
+        colors_matrix = gray_scale_weigthted_arithmetic_mean(colors_matrix)
     return colors_matrix
 
 # Function that convert matrix to image
@@ -30,11 +32,12 @@ def convert_scales2(matrix: np.ndarray):
 # Function to resize some image using another one as reference
 def resize_image(img_matrix1: np.ndarray, img_matrix2: np.ndarray) -> np.ndarray:
 
-    width = img_matrix1.shape[1]
-    height = img_matrix1.shape[0]
+    # Using scaling function
+    from algorithms.geometric_operations import scaling
+    sx = img_matrix2.shape[1] / img_matrix1.shape[1] 
+    sy = img_matrix2.shape[0] / img_matrix1.shape[0] 
 
-    # Applying cv function to resize
-    result_matrix = cv2.resize(img_matrix2, (width, height), interpolation = cv2.INTER_LINEAR)
+    result_matrix = scaling(img_matrix2, sx, sy, "bilinear")
 
     # Returning the result 
     return result_matrix.astype(np.uint8)
@@ -73,3 +76,14 @@ def runs_rgb(function):
         return final_matrix
 
     return wrapper
+
+# Function to normalize
+def normalize(matrix: np.ndarray) -> np.ndarray:
+
+    min_value = np.min(matrix)
+    max_value = np.max(matrix)
+
+    if (max_value == min_value):
+        return np.zeros(matrix.shape, dtype = np.uint8)
+
+    return (matrix - min_value) / (max_value - min_value) * 255

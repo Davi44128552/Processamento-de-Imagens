@@ -3,8 +3,19 @@ import numpy as np
 from .aux_functions import next_power_of_two, runs_rgb
 
 # Discrete Fourier Transform
-@runs_rgb
 def discrete_fourier_transform(img_matrix: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+
+    # Checking the dimensions of the image
+    if (len(img_matrix.shape) == 3):
+
+        real_channels = list()
+        imaginary_channels = list()
+
+        for i in range(0, 3):
+            real, imag = fast_fourier_transform(img_matrix[:, :, i])
+            real_channels.append(real)
+            imaginary_channels.append(imag)
+        return np.dstack(real_channels), np.dstack(imaginary_channels)
 
     # Converting the matrix
     input_matrix = img_matrix.astype(np.float64)
@@ -13,25 +24,24 @@ def discrete_fourier_transform(img_matrix: np.ndarray) -> tuple[np.ndarray, np.n
     N = img_matrix.shape[0]
     M = img_matrix.shape[1]
 
-    # Creating the matrices
-    real_matrix = np.zeros((N, M)).astype(np.float64)
-    imaginary_matrix = np.zeros((N, M)).astype(np.float64)
+    # Creating the rows matrix
+    n = np.arange(N)
+    k = n.reshape((N, 1))
+    weight_rows = np.exp((-2j * np.pi * k * n) / N)
 
-    for i in range(0, N):
-        for j in range(0, M):
-            sum_r = 0
-            sum_i = 0
+    # Creating the columns matrix
+    n = np.arange(M)
+    k = n.reshape((M, 1))
+    weight_columns = np.exp((-2j * np.pi * n * k) / M)
 
-            for r in range(0, N):
-                for c in range(0, M):
-                    sum_r += input_matrix[r][c] * np.cos(2 * np.pi * (((i * r) / N) + ((j * c) / M)))
-                    sum_i -= input_matrix[r][c] * np.sin(2 * np.pi * (((i * r) / N) + ((j * c) / M)))
+    # Calculating discrete fourier transform using the formula
+    result_matrices = weight_rows @ input_matrix @ weight_columns
 
-            # Saving the result in (i,j)
-            real_matrix[i][j] = sum_r
-            imaginary_matrix[i][j] = sum_i
+    # Taking the result matrices
+    real_matrix = result_matrices.real
+    imaginary_matrix = result_matrices.imag
 
-    # Returning the matrices
+    # Returning the final matrices
     return real_matrix, imaginary_matrix
 
 # Functions for the fast Fourier transform
