@@ -142,6 +142,7 @@ class MainWindow(QMainWindow):
 
         self.waiting_for_rotation_click = False
         self.rotation_angle = 0
+        self.alg_type = 'bilinear'
 
         # Some config buttons behavior
     def help(self):
@@ -246,7 +247,7 @@ class MainWindow(QMainWindow):
     def save_image(self):
 
         # Defining the path
-        file_path,_ = QFileDialog.getSaveFileName(self, "Salve a imagem", "", "Imagens (*.png *.bmp)")
+        file_path,_ = QFileDialog.getSaveFileName(self, "Salve a imagem", "", "Imagens (*.png *.bmp *.jpg *.jpeg)")
 
         # Verifying path
         if (file_path):
@@ -743,15 +744,15 @@ class MainWindow(QMainWindow):
 
             # Selecting the alg type
             if (self.ui.scaling_apply_window_ui.radioButton.isChecked()):
-                alg_type = 'nearest'
+                self.alg_type = 'nearest'
             elif (self.ui.scaling_apply_window_ui.radioButton_2.isChecked()):
-                alg_type = 'bilinear'
+                self.alg_type = 'bilinear'
 
             try:
                 # Taking the values
                 sx = float(self.ui.scaling_apply_window_ui.lineEdit.text())
                 sy = float(self.ui.scaling_apply_window_ui.lineEdit_2.text())
-                converted_matrix = scaling(self.matrix, sx, sy, alg_type)
+                converted_matrix = scaling(self.matrix, sx, sy, self.alg_type)
                 print("Pronto!")
                 self.apply_transformation(converted_matrix)
 
@@ -770,6 +771,12 @@ class MainWindow(QMainWindow):
 
             try:
                 self.rotation_angle = int(T)
+
+                if (self.ui.rotating_apply_window_ui.radioButton.isChecked()):
+                    self.alg_type = 'nearest'
+                elif (self.ui.rotating_apply_window_ui.radioButton_2.isChecked()):
+                    self.alg_type = 'bilinear'
+
                 self.waiting_for_rotation_click = True
                 self.ui.ui_pages.label_2.setCursor(Qt.CursorShape.CrossCursor)
             except ValueError:
@@ -780,18 +787,20 @@ class MainWindow(QMainWindow):
     def open_dft_apply(self):
 
         self.active_button(self.ui.button_dft)
-
-        # Taking the image dimensions
-        rows = self.matrix.shape[0]
-        columns = self.matrix.shape[1]
-        operations = (rows**2) * (columns**2) 
-
-        message = f"Provavelmente a execução deste algoritmo não vai terminar... \nA imagem tem {rows} linhas e {columns} colunas! \n Serão realizadas {operations} operações!"
-                  
-        self.ui.dft_apply_window_ui.retranslateUi(self.ui.dft_apply_window, message)
-        self.ui.dft_apply_window.exec()
+        self.original_matrix_shape = self.matrix.shape
 
         real_matrix, imaginary_matrix = discrete_fourier_transform(self.matrix)
+        converted_matrix, shifted_complex_matrix = get_result_image(real_matrix, imaginary_matrix)
+        self.shifted_complex_matrix = shifted_complex_matrix
+       
+        self.is_drawning_mask = True
+        original_height, original_width = shifted_complex_matrix.shape[:2]
+        self.mask_image = QImage(original_width, original_height, QImage.Format.Format_Grayscale8)
+        self.mask_image.fill(QColor(255, 255, 255))
+
+        self.ui.fft_paint_window.show()
+        
+        self.apply_transformation(converted_matrix)
 
     # Apply fft
     def open_fft_apply(self):
@@ -1018,16 +1027,16 @@ class MainWindow(QMainWindow):
             if (shift_h.strip() == ""):
                 shift_h = 0.0
             if (shift_s.strip() == ""):
-                shift_s = 0.0
+                shift_s = 1.0
             if (shift_i.strip() == ""):
-                shift_i = 0.0
+                shift_i = 1.0
 
             try:
                 shift_h = float(shift_h)
                 shift_s = float(shift_s)
                 shift_i = float(shift_i)
 
-                converted_matrix = adjust_color_balance(self.matrix, shift_h, shift_s, shift_i)
+                converted_matrix = adjust_hsi_channels(self.matrix, shift_h, shift_s, shift_i)
                 print("Pronto!")
                 self.apply_transformation(converted_matrix)
 
@@ -1102,7 +1111,7 @@ class MainWindow(QMainWindow):
                 pixel_value = self.matrix[original_y, original_x]
 
                 if self.waiting_for_rotation_click:
-                    converted_matrix = rotation(self.matrix, self.rotation_angle, original_x, original_y)
+                    converted_matrix = rotation(self.matrix, self.rotation_angle, original_x, original_y, self.alg_type)
                     self.apply_transformation(converted_matrix)
                     self.waiting_for_rotation_click = False
                     self.ui.ui_pages.label_2.unsetCursor()

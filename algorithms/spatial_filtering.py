@@ -3,12 +3,12 @@
 # Importing the necessary libraries
 import numpy as np
 from algorithms.intensity_transformations import *
-from .aux_functions import runs_rgb
+from .aux_functions import runs_rgb, normalize
 from numpy.lib.stride_tricks import sliding_window_view
 
 # Convolution
 @runs_rgb
-def convolution(img_matrix: np.ndarray, filter: np.ndarray, float_result: bool = False) -> np.ndarray:
+def convolution(img_matrix: np.ndarray, filter: np.ndarray, float_result: bool = False, norm: bool = True) -> np.ndarray:
 
     # Checking if the filter dimensions are valid
     if ((filter.shape[0] % 2 == 0) or (filter.shape[1] % 2 == 0)):
@@ -27,10 +27,15 @@ def convolution(img_matrix: np.ndarray, filter: np.ndarray, float_result: bool =
     windows = sliding_window_view(new_matrix, window_shape = filter.shape)
     final_matrix = np.tensordot(windows, convolution_filter, axes = ([2, 3], [0, 1]))
 
+    # Normalizing
+    if (norm):
+        final_matrix = normalize(final_matrix)
     # Returning the final matrix
     if (float_result):
         return final_matrix.astype(np.float64)
-    final_matrix = np.clip(final_matrix, 0, 255)
+
+    if (not norm):
+        final_matrix = np.clip(final_matrix, 0, 255)
     return final_matrix.astype(np.uint8)
 
 # Mean filter
@@ -162,16 +167,6 @@ def laplacian(img_matrix: np.ndarray, kernel: int, dimension_log: int, standard_
         # f(x, y) - c * d²f(x, y)
         final_matrix = img_matrix - final_matrix
 
-    # # Normalizing
-    # min_value = np.min(final_matrix)
-    # if (min_value < 0):
-    #     final_matrix = final_matrix + np.abs(min_value)
-    # max_value = np.max(final_matrix)
-    # if (max_value > 0):
-    #     final_matrix = final_matrix / max_value
-
-    # final_matrix = final_matrix * 255
-
     final_matrix = np.clip(final_matrix, 0, 255)
 
     # Returning the result
@@ -206,7 +201,7 @@ def high_boost(img_matrix: np.ndarray, dimension_gauss: int, standard_deviation_
 
 # Sobel filtering
 @runs_rgb
-def sobel(img_matrix: np.ndarray, axis: str) -> np.ndarray:
+def sobel(img_matrix: np.ndarray, axis: str, float_result: bool = False, norm: bool = False) -> np.ndarray:
 
     # Defining the sobel's kernels
     x_kernel = np.array([[-1, 0, 1],
@@ -221,44 +216,29 @@ def sobel(img_matrix: np.ndarray, axis: str) -> np.ndarray:
     if (axis == 'x'):
 
         # Applying the filter in the image
-        x_filtered = convolution(img_matrix, x_kernel)
-
-        # Normalizing the matrix
-        x_filtered_normalized = x_filtered - np.min(x_filtered)
-        x_filtered_normalized = (x_filtered_normalized / np.max(x_filtered_normalized)) * 255
-
+        x_filtered = convolution(img_matrix, x_kernel, float_result, norm = norm)
+        final_matrix = x_filtered
 
     if (axis == 'y'):
 
         # Applying the filter in the image
-        y_filtered = convolution(img_matrix, y_kernel)
-
-        # Normalizing the matrix
-        y_filtered_normalized = y_filtered - np.min(y_filtered)
-        y_filtered_normalized = (y_filtered_normalized / np.max(y_filtered_normalized)) * 255
-
-    # Defining the final matrix
-    if (axis == 'x'):
-        final_matrix = x_filtered_normalized
-    elif (axis == 'y'):
-        final_matrix = y_filtered_normalized
+        y_filtered = convolution(img_matrix, y_kernel, float_result, norm = norm)
+        final_matrix = y_filtered
 
     # Returning the final matriz
-    return final_matrix.astype(np.uint8)
+    return final_matrix
 
 # Magnitude gradient
 @runs_rgb
 def magnitude_gradient(img_matrix: np.ndarray):
 
     # Obtaining the x and y filtered image
-    x_filtered = sobel(img_matrix, 'x').astype(np.float64)
-    y_filtered = sobel(img_matrix, 'y').astype(np.float64)
+    x_filtered = sobel(img_matrix, 'x', float_result = True, norm = False)
+    y_filtered = sobel(img_matrix, 'y', float_result = True, norm = False)
 
-    # Applying the soma described in book |G| = |gx| + |gy|
+    # Applying the formula described in book |G| = |gx| + |gy|
     sum_matrix = np.abs(x_filtered) + np.abs(y_filtered)
-
-    # Applying thresholding
-    sum_matrix = thresholding(sum_matrix, 128)
+    sum_matrix = normalize(sum_matrix)
 
     # Returning the result
     return sum_matrix.astype(np.uint8)

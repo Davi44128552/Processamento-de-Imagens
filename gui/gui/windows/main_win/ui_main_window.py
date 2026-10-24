@@ -24,6 +24,7 @@ import gui.dialogs.dialog_chroma_key as dialog_chroma
 import gui.dialogs.histogram_dialog as histogram_dialog
 import gui.dialogs.dialog_hsi_to_rgb as dialog_rgb
 import gui.dialogs.paint_dialog as paint
+import gui.dialogs.rotating_dialog as rotating_dialog
 
 # Path to select images
 app_path = os.path.abspath(os.getcwd())
@@ -533,9 +534,8 @@ class UI_MainWindow(object):
 
         # Rotating
         self.rotating_apply_window = QDialog()
-        self.rotating_apply_window_ui = one_input.Ui_Dialog()
+        self.rotating_apply_window_ui = rotating_dialog.Ui_Dialog()
         self.rotating_apply_window_ui.setupUi(self.rotating_apply_window)
-        self.rotating_apply_window_ui.retranslateUi(self.rotating_apply_window, "Escreva o ângulo desejado", "0")
         self.rotating_apply_window.setStyleSheet("background-color: #44475a; font: 700 11pt 'Segoe UI'; color: white")
         self.rotating_apply_window.setWindowIcon(QPixmap(os.path.normpath(os.path.join(path, "rotate.svg"))))
         self.rotating_apply_window.setWindowTitle("Rotação")

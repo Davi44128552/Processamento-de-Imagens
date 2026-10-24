@@ -70,7 +70,7 @@ def scaling(img_matrix: np.ndarray, sx: float, sy: float, alg_type: str) -> np.n
 
 # Rotation function
 @runs_rgb
-def rotation(img_matrix: np.ndarray, angle: float, pivot_x: int, pivot_y: int) -> np.ndarray:
+def rotation(img_matrix: np.ndarray, angle: float, pivot_x: int, pivot_y: int, alg_type: str) -> np.ndarray:
 
     # Taking the image dimensions
     original_image_height = img_matrix.shape[0]
@@ -119,20 +119,57 @@ def rotation(img_matrix: np.ndarray, angle: float, pivot_x: int, pivot_y: int) -
             dy = y_pixel - pivot_y
 
             # Rotating the pixel
-            x = dx * np.cos(-rad) - dy * np.sin(-rad)
-            y = dx * np.sin(-rad) + dy * np.cos(-rad)
+            x_exact = dx * np.cos(-rad) - dy * np.sin(-rad) + pivot_x
+            y_exact = dx * np.sin(-rad) + dy * np.cos(-rad) + pivot_y
 
-            # Adding the pivot to the result
-            x = int(round(x + pivot_x))
-            y = int(round(y + pivot_y))
+            # Calculating the values acccording to the algorithm type
+            if (alg_type == 'nearest'):
 
-            # Adding the result to the result matrix
-            # Checking if the pixel position is within the limit
-            condition1 = 0 <= x < original_image_width
-            condition2 = 0 <= y < original_image_height
+                x = int(round(x_exact))
+                y = int(round(y_exact))
 
-            if (condition1 and condition2):
-                result_matrix[r][c] = img_matrix[y][x]
+                # Adding the result to the result matrix
+                # Checking if the pixel position is within the limit
+                condition1 = 0 <= x < original_image_width
+                condition2 = 0 <= y < original_image_height
+
+                if (condition1 and condition2):
+                    result_matrix[r][c] = img_matrix[y][x]
+
+            elif (alg_type == 'bilinear'):
+
+                x = int(np.floor(x_exact))
+                y = int(np.floor(y_exact))
+                x2 = x + 1
+                y2 = y + 1
+                x3 = int(round(x_exact))
+                y3 = int(round(y_exact))
+
+                condition1 = 0 <= x < original_image_width - 1
+                condition2 = 0 <= y < original_image_height - 1
+
+                condition3 = 0 <= x3 < original_image_width
+                condition4 = 0 <= y3 < original_image_height
+
+                # Checking if the values of x and y are valid
+                if (condition1 and condition2):
+
+                    weigth_x = x_exact - x
+                    weigth_y = y_exact - y
+
+                    # Calculating the pixels
+                    pixel11 = img_matrix[y][x]
+                    pixel12 = img_matrix[y][x2]
+                    pixel21 = img_matrix[y2][x]
+                    pixel22 = img_matrix[y2][x2]
+
+                    # Calculating the pixel value
+                    pixel = pixel11 * (1 - weigth_x) * (1 - weigth_y) + pixel12 * weigth_x * (1 - weigth_y) + pixel21 * (1 - weigth_x) * weigth_y + pixel22 * weigth_x * weigth_y
+                    result_matrix[r][c] = pixel
+
+                elif (condition3 and condition4):
+
+                    result_matrix[r][c] = img_matrix[y3][x3]
 
     # Returning the result
     return result_matrix.astype(np.uint8)
