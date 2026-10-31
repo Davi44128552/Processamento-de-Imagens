@@ -87,6 +87,46 @@ def power_law_transformation(img_matrix: np.ndarray, gamma: float = 1) -> np.nda
     return final_matrix.astype(img_matrix.dtype)
 
 # Piecewise Linear Transformation Functions
+    # piecewise linear transformation
+@runs_rgb
+def piecewise_linear(img_matrix: np.ndarray, control_points: list) -> np.ndarray:
+
+    # Sorting the tuple according to r values
+    sorted_list = sorted(control_points, key = lambda x : x[0])
+
+    # Checking if the values are valid
+    if ((sorted_list[0][0] != 0) or (sorted_list[len(sorted_list) - 1][0] != 255)):
+        print("Faltam os pontos inicial e final!")
+        return
+
+    # Constructing the Look-Up Table
+    LUT = np.zeros(256, dtype = np.float64)
+
+    for i in range(0, len(sorted_list) - 1):
+
+        # Taking the adjacent points
+        point_one = sorted_list[i]
+        point_two = sorted_list[i + 1]
+
+        # Calculating slope according to formula: m = (s_k - s_(k-1)) / (r_k - r_(k-1))
+        # If rk and r_(k+1) are equal, we avoid division by 0 defining slope as 0
+        if (point_two[0] == point_one[0]):
+            slope = 0.0
+        else:
+            # Applying the formula
+            slope = (point_two[1] - point_one[1]) / (point_two[0] - point_one[0])
+
+        # Applying linear mapping in each element of LUT
+        for j in range(point_one[0], point_two[0] + 1):
+            LUT[j] = point_one[1] + slope * (j - point_one[0])
+
+    # Applying the Look-Up Table into the image
+    final_matrix = np.round(LUT[img_matrix])
+    final_matrix = np.clip(final_matrix, 0, 255)
+
+    # Returning the final matrix
+    return final_matrix.astype(np.uint8)
+
     # Constrast stretching
 @runs_rgb
 def contrast_stretching(img_matrix: np.ndarray) -> np.ndarray:
