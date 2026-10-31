@@ -84,6 +84,6 @@ def normalize(matrix: np.ndarray) -> np.ndarray:
     max_value = np.max(matrix)
 
     if (max_value == min_value):
-        return np.zeros(matrix.shape, dtype = np.uint8)
+        return np.zeros(matrix.shape, dtype = np.float64)
 
     return (matrix - min_value) / (max_value - min_value) * 255

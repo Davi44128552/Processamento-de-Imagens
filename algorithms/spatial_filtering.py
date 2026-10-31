@@ -8,7 +8,7 @@ from numpy.lib.stride_tricks import sliding_window_view
 
 # Convolution
 @runs_rgb
-def convolution(img_matrix: np.ndarray, filter: np.ndarray, float_result: bool = False, norm: bool = True) -> np.ndarray:
+def convolution(img_matrix: np.ndarray, filter: np.ndarray, float_result: bool = False, norm: bool = False) -> np.ndarray:
 
     # Checking if the filter dimensions are valid
     if ((filter.shape[0] % 2 == 0) or (filter.shape[1] % 2 == 0)):
@@ -31,11 +31,13 @@ def convolution(img_matrix: np.ndarray, filter: np.ndarray, float_result: bool =
     if (norm):
         final_matrix = normalize(final_matrix)
     # Returning the final matrix
+    elif (not float_result):
+        final_matrix = np.clip(final_matrix, 0, 255)
+
     if (float_result):
         return final_matrix.astype(np.float64)
 
-    if (not norm):
-        final_matrix = np.clip(final_matrix, 0, 255)
+    final_matrix = np.round(final_matrix)
     return final_matrix.astype(np.uint8)
 
 # Mean filter
@@ -201,7 +203,7 @@ def high_boost(img_matrix: np.ndarray, dimension_gauss: int, standard_deviation_
 
 # Sobel filtering
 @runs_rgb
-def sobel(img_matrix: np.ndarray, axis: str, float_result: bool = False, norm: bool = False) -> np.ndarray:
+def sobel(img_matrix: np.ndarray, axis: str, float_result: bool = False, norm: bool = True) -> np.ndarray:
 
     # Defining the sobel's kernels
     x_kernel = np.array([[-1, 0, 1],
@@ -241,4 +243,5 @@ def magnitude_gradient(img_matrix: np.ndarray):
     sum_matrix = normalize(sum_matrix)
 
     # Returning the result
+    sum_matrix = np.round(sum_matrix)
     return sum_matrix.astype(np.uint8)

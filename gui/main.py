@@ -19,6 +19,7 @@ from algorithms.frequency_domain_filtering import *
 from algorithms.colors_algorithms import *
 from gui.dialogs.dialog_convolution_matrix import ConvolutionMatrixDialog
 from gui.dialogs.dialog_hsi_result import HSIDialog
+from gui.dialogs.dialog_canvas import DialogCanvas
 
 # Main window class
 class MainWindow(QMainWindow):
@@ -51,6 +52,7 @@ class MainWindow(QMainWindow):
         self.ui.button_brightness.clicked.connect(self.open_brightness)
         self.ui.button_logarithm_transformation.clicked.connect(self.open_logarithm)
         self.ui.button_power_law.clicked.connect(self.open_power_law)
+        self.ui.button_piecewise_linear.clicked.connect(self.opne_piecewise_linear)
         self.ui.button_contrast_stretching.clicked.connect(self.open_contrast_stretching)
         self.ui.button_intensity_level_slicing.clicked.connect(self.open_intensity_level_slicing)
         self.ui.button_bit_plane_slicing.clicked.connect(self.open_bit_plane_slicing)
@@ -137,7 +139,7 @@ class MainWindow(QMainWindow):
                                        self.ui.button_contrast_stretching, self.ui.button_intensity_level_slicing, self.ui.button_bit_plane_slicing,
                                        self.ui.button_steganography_apply, self.ui.button_steganography_undo, self.ui.config_button, self.ui.toggle_button, self.ui.toggle_button2, 
                                        self.ui.toggle_button3, self.ui.button_convolution, self.ui.button_mean, self.ui.button_gaussian, 
-                                       self.ui.button_median, self.ui.button_laplacian, self.ui.button_highboost, 
+                                       self.ui.button_median, self.ui.button_laplacian, self.ui.button_highboost, self.ui.button_piecewise_linear,
                                        self.ui.button_sobel, self.ui.button_magnitude_gradient, self.ui.toggle_spatial_button]
 
         self.waiting_for_rotation_click = False
@@ -480,6 +482,23 @@ class MainWindow(QMainWindow):
                 print("O valor deve ser float")
                 return
 
+    # Piecewise linear
+    def opne_piecewise_linear(self):
+
+        self.active_button(self.ui.button_piecewise_linear)
+
+        # Open the dialog window
+        dialog = DialogCanvas(self)
+        if (dialog.exec()):
+            try:
+                # Executing the algorithm
+                converted_matrix = piecewise_linear(self.matrix, dialog.get_points())
+                self.apply_transformation(converted_matrix)
+
+            except ValueError as e:
+                QMessageBox.warning(self, "Erro", str(e))
+                return
+
     # Contrast stretching
     def open_contrast_stretching(self):
 
@@ -572,7 +591,7 @@ class MainWindow(QMainWindow):
 
                 if matrix_dialog.exec():
                     kernel = matrix_dialog.get_matrix()
-                    converted_matrix = convolution(self.matrix, kernel)
+                    converted_matrix = convolution(self.matrix, kernel, norm=True)
                     print("Pronto!")
                     self.apply_transformation(converted_matrix)
 
@@ -828,7 +847,11 @@ class MainWindow(QMainWindow):
     # Inverse fourier
     def open_ifft_apply(self):
 
-        if not hasattr(self, 'shifted_complex_matrix' or self.mask_image is None):
+        # First checks to go on with the code
+        condition1 = not hasattr(self, 'shifted_complex_matrix')
+        condition2 = not hasattr(self, 'mask_image')
+
+        if (condition1 or condition2 or self.mask_image is None):
             print("Não há nenhuma matriz fft para aplicar a inversa!")
             return
 
