@@ -182,7 +182,7 @@ class UI_MainWindow(object):
         self.toggle2_button = PyPushButton(text = "Menu", icon_path = "icon_menu.svg")
         self.toggle_histogram_button = PyPushButton(text = "Menu", icon_path = "icon_menu.svg")
         self.toggle_spatial_button = PyPushButton(text = "Menu", icon_path = "icon_menu.svg")
-        self.button_thresholding = PyPushButton(text = "Linearização", icon_path = "icon1.svg")
+        self.button_thresholding = PyPushButton(text = "Limiarização", icon_path = "icon1.svg")
         self.button_negative = PyPushButton(text = "Negativa", icon_path = "icon2.svg")
         self.button_brightness = PyPushButton(text = "Brilho", icon_path = "icon10.svg")
         self.button_logarithm_transformation = PyPushButton(text = "Transformação Logarítmica", icon_path = "icon3.svg")

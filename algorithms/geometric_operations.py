@@ -15,55 +15,57 @@ def scaling(img_matrix: np.ndarray, sx: float, sy: float, alg_type: str) -> np.n
     n_columns_matrix = int(np.round(img_matrix.shape[1] * sx))
     result_matrix = np.zeros((n_rows_matrix, n_columns_matrix))
 
+    c, r = np.meshgrid(np.arange(n_columns_matrix), np.arange(n_rows_matrix))
+    
     # Scaling the matrix
-    for r in range(0, n_rows_matrix):
-        for c in range(0, n_columns_matrix):
 
-            # Applying the mapping formula
-            
-            x = c / sx
-            y = r / sy
+    # Applying the mapping formula
+    
+    x = c / sx
+    y = r / sy
 
-            if (alg_type == 'nearest'):
+    if (alg_type == 'nearest'):
 
-                # 1st method
+        # 1st method
 
-                # Rounding the result values
-                x = int(np.round(x))
-                y = int(np.round(y))
+        # Rounding the result values
+        x = np.round(x).astype(int)
+        y = np.round(y).astype(int)
 
-                # Applying to the image
-                x = max(0, min(x, img_matrix.shape[1] - 1))
-                y = max(0, min(y, img_matrix.shape[0] - 1))
-                result_matrix[r][c] = img_matrix[y][x]
+        # Applying to the image
+        x = np.clip(x, 0, original_matrix_width - 1)
+        y = np.clip(y, 0, original_matrix_height - 1)
+        result_matrix = img_matrix[y, x]
 
-            elif (alg_type == 'bilinear'):
+    elif (alg_type == 'bilinear'):
 
-                # 2nd method
+        # 2nd method
+        x_int = np.floor(x).astype(int)
+        y_int = np.floor(y).astype(int)
 
-                # Taking the neighboors coordinates
-                xul = max(0, min(int(x), original_matrix_width - 1))
-                yul = max(0, min(int(y), original_matrix_height - 1))
-                xbr = min(int(x) + 1, original_matrix_width - 1)
-                ybr = min(int(y) + 1, original_matrix_height - 1)
+        # Taking the neighboors coordinates
+        xul = np.clip(x_int, 0, original_matrix_width - 1)
+        yul = np.clip(y_int, 0, original_matrix_height - 1)
+        xbr = np.clip(x_int + 1, 0, original_matrix_width - 1)
+        ybr = np.clip(y_int + 1, 0, original_matrix_height - 1)
 
-                # Getting the pixel neighborhood
-                q11 = img_matrix[yul][xul]
-                q12 = img_matrix[ybr][xul]
-                q21 = img_matrix[yul][xbr]
-                q22 = img_matrix[ybr][xbr]
+        # Getting the pixel neighborhood
+        q11 = img_matrix[yul, xul]
+        q12 = img_matrix[ybr, xul]
+        q21 = img_matrix[yul, xbr]
+        q22 = img_matrix[ybr, xbr]
 
-                # Applying interpolation along the axes
-                dx = x - int(x) 
-                dy = y - int(y)
+        # Applying interpolation along the axes
+        dx = x - x_int
+        dy = y - y_int
 
-                    # X
-                r1 = (1 - dx) * q11 + dx * q21
-                r2 = (1 - dx) * q12 + dx * q22
+            # X
+        r1 = (1 - dx) * q11 + dx * q21
+        r2 = (1 - dx) * q12 + dx * q22
 
-                    # Y
-                pixel_result_value = (1 - dy) * r1 + dy * r2
-                result_matrix[r][c] = pixel_result_value
+            # Y
+        pixel_result_value = (1 - dy) * r1 + dy * r2
+        result_matrix = pixel_result_value
 
     # Returning the final matrix
     return result_matrix.astype(np.uint8)
@@ -107,69 +109,64 @@ def rotation(img_matrix: np.ndarray, angle: float, pivot_x: int, pivot_y: int, a
     dimension = [int(round(Y_max - Y_min)), int(round(X_max - X_min))]
     result_matrix = np.zeros((dimension[0], dimension[1]))
 
-    for r in range(0, dimension[0]):
-        for c in range(0, dimension[1]):
+    c, r = np.meshgrid(np.arange(dimension[1]), np.arange(dimension[0]))
 
-            # Taking the pixels values
-            x_pixel = c + X_min
-            y_pixel = r + Y_min
+    # Taking the pixels values
+    x_pixel = c + X_min
+    y_pixel = r + Y_min
 
-            # Calculating the distance between the pixel and the pivot
-            dx = x_pixel - pivot_x
-            dy = y_pixel - pivot_y
+    # Calculating the distance between the pixel and the pivot
+    dx = x_pixel - pivot_x
+    dy = y_pixel - pivot_y
 
-            # Rotating the pixel
-            x_exact = dx * np.cos(-rad) - dy * np.sin(-rad) + pivot_x
-            y_exact = dx * np.sin(-rad) + dy * np.cos(-rad) + pivot_y
+    # Rotating the pixel
+    x_exact = dx * np.cos(-rad) - dy * np.sin(-rad) + pivot_x
+    y_exact = dx * np.sin(-rad) + dy * np.cos(-rad) + pivot_y
 
-            # Calculating the values acccording to the algorithm type
-            if (alg_type == 'nearest'):
+    # Calculating the values acccording to the algorithm type
+    if (alg_type == 'nearest'):
 
-                x = int(round(x_exact))
-                y = int(round(y_exact))
+        x = np.round(x_exact).astype(int)
+        y = np.round(y_exact).astype(int)
 
-                # Adding the result to the result matrix
-                # Checking if the pixel position is within the limit
-                condition1 = 0 <= x < original_image_width
-                condition2 = 0 <= y < original_image_height
+        # Adding the result to the result matrix
+        # Checking if the pixel position is within the limit
+        condition1 = (x >= 0) & (x < original_image_width) 
+        condition2 = (y >= 0) & (y < original_image_height)
 
-                if (condition1 and condition2):
-                    result_matrix[r][c] = img_matrix[y][x]
+        result_matrix[(condition1 & condition2)] = img_matrix[y[(condition1 & condition2)], x[(condition1 & condition2)]]
 
-            elif (alg_type == 'bilinear'):
+    elif (alg_type == 'bilinear'):
 
-                x = int(np.floor(x_exact))
-                y = int(np.floor(y_exact))
-                x2 = x + 1
-                y2 = y + 1
-                x3 = int(round(x_exact))
-                y3 = int(round(y_exact))
+        x = np.floor(x_exact).astype(int)
+        y = np.floor(y_exact).astype(int)
+        x2 = x + 1
+        y2 = y + 1
+        x3 = np.round(x_exact).astype(int)
+        y3 = np.round(y_exact).astype(int)
 
-                condition1 = 0 <= x < original_image_width - 1
-                condition2 = 0 <= y < original_image_height - 1
+        condition1 = (x >= 0) & (x2 < original_image_width)
+        condition2 = (y >= 0) & (y2 < original_image_height)
 
-                condition3 = 0 <= x3 < original_image_width
-                condition4 = 0 <= y3 < original_image_height
+        weigth_x = x_exact[(condition1 & condition2)] - x[(condition1 & condition2)]
+        weigth_y = y_exact[(condition1 & condition2)] - y[(condition1 & condition2)]
 
-                # Checking if the values of x and y are valid
-                if (condition1 and condition2):
+        # Calculating the pixels
+        pixel11 = img_matrix[y[(condition1 & condition2)], x[(condition1 & condition2)]]
+        pixel12 = img_matrix[y[(condition1 & condition2)], x2[(condition1 & condition2)]]
+        pixel21 = img_matrix[y2[(condition1 & condition2)], x[(condition1 & condition2)]]
+        pixel22 = img_matrix[y2[(condition1 & condition2)], x2[(condition1 & condition2)]]
 
-                    weigth_x = x_exact - x
-                    weigth_y = y_exact - y
+        # Calculating the pixel value
+        pixel = pixel11 * (1 - weigth_x) * (1 - weigth_y) + pixel12 * weigth_x * (1 - weigth_y) + pixel21 * (1 - weigth_x) * weigth_y + pixel22 * weigth_x * weigth_y
+        result_matrix[(condition1 & condition2)] = pixel
 
-                    # Calculating the pixels
-                    pixel11 = img_matrix[y][x]
-                    pixel12 = img_matrix[y][x2]
-                    pixel21 = img_matrix[y2][x]
-                    pixel22 = img_matrix[y2][x2]
+        # Applying nearest in the edges
+        condition3 = (x3 >= 0) & (x3 < original_image_width)
+        condition4 = (y3 >= 0) & (y3 < original_image_height)
+        condition5 = ~(condition1 & condition2)
 
-                    # Calculating the pixel value
-                    pixel = pixel11 * (1 - weigth_x) * (1 - weigth_y) + pixel12 * weigth_x * (1 - weigth_y) + pixel21 * (1 - weigth_x) * weigth_y + pixel22 * weigth_x * weigth_y
-                    result_matrix[r][c] = pixel
-
-                elif (condition3 and condition4):
-
-                    result_matrix[r][c] = img_matrix[y3][x3]
+        result_matrix[(condition5 & condition4 & condition3)] = img_matrix[y3[(condition5 & condition4 & condition3)], x3[(condition5 & condition4 & condition3)]]
 
     # Returning the result
     return result_matrix.astype(np.uint8)
