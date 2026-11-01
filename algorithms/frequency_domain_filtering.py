@@ -12,7 +12,7 @@ def discrete_fourier_transform(img_matrix: np.ndarray) -> tuple[np.ndarray, np.n
         imaginary_channels = list()
 
         for i in range(0, 3):
-            real, imag = fast_fourier_transform(img_matrix[:, :, i])
+            real, imag = discrete_fourier_transform(img_matrix[:, :, i])
             real_channels.append(real)
             imaginary_channels.append(imag)
         return np.dstack(real_channels), np.dstack(imaginary_channels)

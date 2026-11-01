@@ -30,14 +30,14 @@ def convert_scales2(matrix: np.ndarray):
     return final_matrix
 
 # Function to resize some image using another one as reference
-def resize_image(img_matrix1: np.ndarray, img_matrix2: np.ndarray) -> np.ndarray:
+def resize_image(reference_matrix: np.ndarray, matrix_to_resize: np.ndarray) -> np.ndarray:
 
     # Using scaling function
     from algorithms.geometric_operations import scaling
-    sx = img_matrix2.shape[1] / img_matrix1.shape[1] 
-    sy = img_matrix2.shape[0] / img_matrix1.shape[0] 
+    sx = reference_matrix.shape[1] / matrix_to_resize.shape[1] 
+    sy = reference_matrix.shape[0] / matrix_to_resize.shape[0] 
 
-    result_matrix = scaling(img_matrix2, sx, sy, "bilinear")
+    result_matrix = scaling(matrix_to_resize, sx, sy, "bilinear")
 
     # Returning the result 
     return result_matrix.astype(np.uint8)

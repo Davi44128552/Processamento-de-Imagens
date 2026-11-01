@@ -45,6 +45,9 @@ class MainWindow(QMainWindow):
         # Toggle button action
         self.ui.toggle_button.clicked.connect(lambda: self.toggle_button(self.ui.left_menu))
 
+        # Undo operation key shortcut
+        QShortcut(QKeySequence("Ctrl+Z"), self).activated.connect(self.undo_operation)
+
         # Calling the function to apply the transformation
         self.ui.toggle2_button.clicked.connect(lambda: self.toggle_button(self.ui.transformation_menu))
         self.ui.button_thresholding.clicked.connect(self.open_thresholding)
@@ -120,6 +123,7 @@ class MainWindow(QMainWindow):
         self.ui.get_rgb_window_ui.buttonBox.clicked.connect(self.ui.get_rgb_window.accept)
         # self.ui.histogram_window_ui.pushButton.clicked.connect(self.ui.histogram_window.accept)
         
+        self.converted_matrix = []
         self.is_drawning_mask = False
         self.drawning = False
         self.last_point = QPoint()
@@ -182,7 +186,17 @@ class MainWindow(QMainWindow):
         self.ui.left_menu.show()
 
         # Returning to main window
-        self.ui.pages.setCurrentWidget(self.ui.ui_pages.page1)
+        self.is_drawning_mask = False
+        self.ui.fft_paint_window.hide()
+
+        # Going back to home page
+        if (self.matrix is None):
+            self.ui.pages.setCurrentWidget(self.ui.ui_pages.page1)
+
+        else:
+            self.show_last_matrix(self.matrix)
+            self.ui.pages.setCurrentWidget(self.ui.ui_pages.page2)
+            self.select_algorithms(None)
 
     # Adding a action to toggle button
     def toggle_button(self, menu):
@@ -200,6 +214,12 @@ class MainWindow(QMainWindow):
         self.animation.setEasingCurve(QEasingCurve.InOutCirc)
         self.animation.start()
 
+    # Load imagem
+    def load_image(self, file_path):
+        self.converted_matrix = [conversion_to_matrix(file_path)]
+        self.is_drawning_mask = False
+        self.show_last_matrix(self.matrix)
+
     # Adding the button function to open a image
     def open_image(self):
 
@@ -211,14 +231,7 @@ class MainWindow(QMainWindow):
         if (file_path):
 
             # Reading the image
-            load_image = QImage(file_path)
-            load_image = QPixmap.fromImage(load_image)
-
-            # Applying scale
-            load_image = self.resize_image_display(load_image)
-
-            # Changing the label and showing the image to the user
-            self.ui.ui_pages.label_2.setPixmap(load_image)
+            self.load_image(file_path)
             self.ui.pages.setCurrentWidget(self.ui.ui_pages.page2)
 
             self.select_algorithms(file_path)
@@ -233,15 +246,10 @@ class MainWindow(QMainWindow):
         image_path = os.path.join(directory, "..", "test_images", "calopsita.jpg")
         image_path = os.path.normpath(image_path)
         if (image_path):
-
+           
             # Reading the image
-            random_image = QPixmap(image_path)
-            random_image = self.resize_image_display(random_image)
-
-            # Changing the label and showing the image to the user
-            self.ui.ui_pages.label.setPixmap(random_image)
-            self.ui.pages.setCurrentWidget(self.ui.ui_pages.page3)
-
+            self.load_image(image_path)
+            self.ui.pages.setCurrentWidget(self.ui.ui_pages.page2)
             self.select_algorithms(image_path)
 
             # Going to transformation function
@@ -265,7 +273,6 @@ class MainWindow(QMainWindow):
         self.ui.transformation_menu.show()
 
         # Reading the image
-        self.matrix = conversion_to_matrix(img_path)
         self.final_image = conversion_to_image(self.matrix)
 
     # Function to apply the histogram
@@ -276,21 +283,24 @@ class MainWindow(QMainWindow):
         self.ui.left_menu.hide()
         self.ui.main_layout.insertWidget(0, self.ui.equalization_hist_menu)
         self.ui.equalization_hist_menu.show()
-        self.matrix = conversion_to_matrix(img_path)
 
         # Executing histogram window
         if (self.ui.histogram_window.exec()):
 
+            matrix_before = self.matrix
+
             if (self.ui.histogram_window_ui.radioButton.isChecked()):
-                self.matrix = conversion_to_matrix(img_path, "L")
-                converted_matrix = histogram_equalization(self.matrix)
-                QTimer.singleShot(2000, lambda: calculate_histogram(self.matrix, title = "Histograma antes da equalização", generate_graph = True))
-                QTimer.singleShot(2000, lambda: calculate_histogram(converted_matrix, title = "Histograma depois da equalização", generate_graph = True))
+                gray_image = gray_scale_weigthted_arithmetic_mean(matrix_before)[:, :, 0]
+                result_matrix = histogram_equalization(gray_image)
+                QTimer.singleShot(2000, lambda: calculate_histogram(gray_image, title = "Histograma antes da equalização", generate_graph = True))
+                QTimer.singleShot(2000, lambda: calculate_histogram(result_matrix, title = "Histograma depois da equalização", generate_graph = True))
             elif (self.ui.histogram_window_ui.radioButton_2.isChecked()):
-                converted_matrix = rgb_histogram_equalization(self.matrix)
-                QTimer.singleShot(2000, lambda: rgb_histogram(self.matrix, title = "Histograma de distribuição de cores", generate_graph = True))
-                QTimer.singleShot(2000, lambda: rgb_histogram(converted_matrix, title = "Histograma de distribuição de cores depois da equalização", generate_graph = True))
-        self.apply_transformation(converted_matrix)
+                result_matrix = rgb_histogram_equalization(matrix_before)
+                QTimer.singleShot(2000, lambda: rgb_histogram(matrix_before, title = "Histograma de distribuição de cores", generate_graph = True))
+                QTimer.singleShot(2000, lambda: rgb_histogram(result_matrix, title = "Histograma de distribuição de cores depois da equalização", generate_graph = True))
+
+            self.converted_matrix.append(result_matrix)
+            self.apply_transformation(self.converted_matrix[-1])
 
     def apply_spatial_filtering(self, img_path):
 
@@ -301,7 +311,6 @@ class MainWindow(QMainWindow):
         self.ui.spatial_filtering_menu.show()
 
         # Reading the image
-        self.matrix = conversion_to_matrix(img_path)
         self.final_image = conversion_to_image(self.matrix)
 
     def apply_geometric_operations(self, img_path):
@@ -313,7 +322,6 @@ class MainWindow(QMainWindow):
         self.ui.geometric_operations_menu.show()
 
         # Reading the image
-        self.matrix = conversion_to_matrix(img_path)
         self.final_image = conversion_to_image(self.matrix)
 
     def apply_frequency_domain(self, img_path):
@@ -325,7 +333,6 @@ class MainWindow(QMainWindow):
         self.ui.frequency_algorithms_menu.show()
 
         # Reading the image
-        self.matrix = conversion_to_matrix(img_path)
         self.final_image = conversion_to_image(self.matrix)
 
     def apply_colors_algorithms(self, img_path):
@@ -337,7 +344,6 @@ class MainWindow(QMainWindow):
         self.ui.colors_algorithms_menu.show()
 
         # Reading the image
-        self.matrix = conversion_to_matrix(img_path)
         self.final_image = conversion_to_image(self.matrix)
 
     def active_button(self, selected_button):
@@ -394,8 +400,8 @@ class MainWindow(QMainWindow):
 
             try:
                 T = int(T)
-                converted_matrix = thresholding(self.matrix, T)
-                self.apply_transformation(converted_matrix)
+                self.converted_matrix.append(thresholding(self.matrix, T))
+                self.apply_transformation(self.converted_matrix[-1])
             except ValueError:
                 print("O valor deve ser inteiro")
                 return
@@ -413,14 +419,14 @@ class MainWindow(QMainWindow):
             
             try:
                 L = float(L)
-                converted_matrix = negative(self.matrix, L)
-                self.apply_transformation(converted_matrix)
+                self.converted_matrix.append(negative(self.matrix, L))
+                self.apply_transformation(self.converted_matrix[-1])
             except ValueError:
                 if (L.strip() != ""):
                     print("O valor deve ser um número")
                     return
-                converted_matrix = negative(self.matrix)
-                self.apply_transformation(converted_matrix)
+                self.converted_matrix.append(negative(self.matrix))
+                self.apply_transformation(self.converted_matrix[-1])
 
     # Brightness
     def open_brightness(self):
@@ -435,8 +441,8 @@ class MainWindow(QMainWindow):
 
             try:
                 k = float(k)
-                converted_matrix = brightness(self.matrix, k)
-                self.apply_transformation(converted_matrix)
+                self.converted_matrix.append(brightness(self.matrix, k))
+                self.apply_transformation(self.converted_matrix[-1])
             except ValueError:
                 print("O valor deve ser um número!")
                 return 
@@ -454,14 +460,14 @@ class MainWindow(QMainWindow):
 
             try:
                 c = float(c)
-                converted_matrix = negative(self.matrix, c)
-                self.apply_transformation(converted_matrix)
+                self.converted_matrix.append(logarithm_transformation(self.matrix, c))
+                self.apply_transformation(self.converted_matrix[-1])
             except ValueError:
                 if (c.strip() != ""):
                     print("O valor deve ser um número")
                     return
-                converted_matrix = logarithm_transformation(self.matrix)
-                self.apply_transformation(converted_matrix)
+                self.converted_matrix.append(logarithm_transformation(self.matrix))
+                self.apply_transformation(self.converted_matrix[-1])
 
     # Power law
     def open_power_law(self):
@@ -476,8 +482,8 @@ class MainWindow(QMainWindow):
 
             try:
                 gamma = float(gamma)
-                converted_matrix = power_law_transformation(self.matrix, gamma)
-                self.apply_transformation(converted_matrix)
+                self.converted_matrix.append(power_law_transformation(self.matrix, gamma))
+                self.apply_transformation(self.converted_matrix[-1])
             except ValueError:
                 print("O valor deve ser float")
                 return
@@ -492,8 +498,8 @@ class MainWindow(QMainWindow):
         if (dialog.exec()):
             try:
                 # Executing the algorithm
-                converted_matrix = piecewise_linear(self.matrix, dialog.get_points())
-                self.apply_transformation(converted_matrix)
+                self.converted_matrix.append(piecewise_linear(self.matrix, dialog.get_points()))
+                self.apply_transformation(self.converted_matrix[-1])
 
             except ValueError as e:
                 QMessageBox.warning(self, "Erro", str(e))
@@ -505,8 +511,8 @@ class MainWindow(QMainWindow):
         self.active_button(self.ui.button_contrast_stretching)
 
         # Executing the algorithm
-        converted_matrix = contrast_stretching(self.matrix)
-        self.apply_transformation(converted_matrix)
+        self.converted_matrix.append(contrast_stretching(self.matrix))
+        self.apply_transformation(self.converted_matrix[-1])
 
     # Intensity level slicing
     def open_intensity_level_slicing(self):
@@ -522,8 +528,8 @@ class MainWindow(QMainWindow):
             try:
                 min_value = int(min_value)
                 max_value = int(max_value)
-                converted_matrix = intensity_level_slicing(self.matrix, min_value, max_value, algorithm)
-                self.apply_transformation(converted_matrix)
+                self.converted_matrix.append(intensity_level_slicing(self.matrix, min_value, max_value, algorithm))
+                self.apply_transformation(self.converted_matrix[-1])
             except ValueError:
                 print("Os valores mínimo e máximo devem ser inteiros!")
                 return
@@ -540,8 +546,8 @@ class MainWindow(QMainWindow):
 
             try:
                 bit_reference = int(bit_reference)
-                converted_matrix = bit_plane_slicing(self.matrix, bit_reference)
-                self.apply_transformation(converted_matrix)
+                self.converted_matrix.append(bit_plane_slicing(self.matrix, bit_reference))
+                self.apply_transformation(self.converted_matrix[-1])
             except ValueError:
                 print("O valor deve ser inteiro")
                 return
@@ -554,8 +560,8 @@ class MainWindow(QMainWindow):
         # Executing the steganography window
         if (self.ui.steganopgraphy_apply_window.exec()):
             message = self.ui.steganopgraphy_apply_window_ui.lineEdit.text()
-            converted_matrix = steganography_apply(self.matrix, message)
-            self.apply_transformation(converted_matrix)
+            self.converted_matrix.append(steganography_apply(self.matrix, message))
+            self.apply_transformation(self.converted_matrix[-1])
 
     def open_steganography_decode(self):
 
@@ -566,12 +572,28 @@ class MainWindow(QMainWindow):
         self.ui.steganography_decode_window_ui.retranslateUi(self.ui.steganography_decode_window, message)
         self.ui.steganography_decode_window.exec()
 
+    def show_last_matrix(self, matrix):
+        self.final_image = QPixmap.fromImage(ImageQt(conversion_to_image(matrix)))
+        self.ui.ui_pages.label_2.setPixmap(self.resize_image_display(self.final_image))
+
     def apply_transformation(self, converted_matrix: np.ndarray = None):
-        self.final_image = conversion_to_image(converted_matrix)
-        self.final_image = ImageQt(self.final_image)
-        self.final_image = QPixmap.fromImage(self.final_image)
-        self.final_image_show = self.resize_image_display(self.final_image)
-        self.ui.ui_pages.label_2.setPixmap(self.final_image_show)
+        last_matrix = self.converted_matrix[-1]
+        last_matrix = np.clip(last_matrix, 0, 255)
+        last_matrix = last_matrix.astype(np.uint8)
+
+        # Checking the type of image and standardizing to rgb
+        if (last_matrix.ndim == 2):
+            last_matrix = np.dstack((last_matrix, last_matrix, last_matrix))
+        self.converted_matrix[-1] = last_matrix
+
+        # Limiting the memory to avoid problems with the memory
+        if (len(self.converted_matrix) > 10):
+            self.converted_matrix.pop(0)
+
+        self.is_drawning_mask = False
+        self.ui.fft_paint_window.hide()
+
+        self.show_last_matrix(last_matrix)
 
     # Spatial filtering algorithms
     # Convolution
@@ -591,9 +613,9 @@ class MainWindow(QMainWindow):
 
                 if matrix_dialog.exec():
                     kernel = matrix_dialog.get_matrix()
-                    converted_matrix = convolution(self.matrix, kernel, norm=True)
+                    self.converted_matrix.append(convolution(self.matrix, kernel, norm = True))
                     print("Pronto!")
-                    self.apply_transformation(converted_matrix)
+                    self.apply_transformation(self.converted_matrix[-1])
 
             except ValueError:
                 print("Erro de valor!")
@@ -611,9 +633,9 @@ class MainWindow(QMainWindow):
 
             try:
                 T = int(T)
-                converted_matrix = mean_filter(self.matrix, T)
+                self.converted_matrix.append(mean_filter(self.matrix, T))
                 print("Pronto!")
-                self.apply_transformation(converted_matrix)
+                self.apply_transformation(self.converted_matrix[-1])
             except ValueError:
                 print("O valor deve ser inteiro")
                 return
@@ -632,9 +654,9 @@ class MainWindow(QMainWindow):
             try:
                 kernel_size = int(kernel_size)
                 standard_deviation = float(standard_deviation)
-                converted_matrix = gaussian_smoothing(self.matrix, kernel_size, standard_deviation)
+                self.converted_matrix.append(gaussian_smoothing(self.matrix, kernel_size, standard_deviation))
                 print("Pronto!")
-                self.apply_transformation(converted_matrix)
+                self.apply_transformation(self.converted_matrix[-1])
             except ValueError:
                 print("Os valores devem ser inteiro e decimal, respectivamente")
                 return 
@@ -652,9 +674,9 @@ class MainWindow(QMainWindow):
 
             try:
                 T = int(T)
-                converted_matrix = median_filter(self.matrix, T)
+                self.converted_matrix.append(median_filter(self.matrix, T))
                 print("Pronto!")
-                self.apply_transformation(converted_matrix)
+                self.apply_transformation(self.converted_matrix[-1])
             except ValueError:
                 print("O valor deve ser inteiro")
                 return
@@ -696,9 +718,9 @@ class MainWindow(QMainWindow):
                 standard_deviation_log = 0
 
 
-            converted_matrix = laplacian(self.matrix, kernel, dimension_log, standard_deviation_log, log)
+            self.converted_matrix.append(laplacian(self.matrix, kernel, dimension_log, standard_deviation_log, log))
             print("Pronto!")
-            self.apply_transformation(converted_matrix)
+            self.apply_transformation(self.converted_matrix[-1])
 
     # High boost filter
     def open_highboost_filter_apply(self):
@@ -717,9 +739,9 @@ class MainWindow(QMainWindow):
                 gauss_dimension_filter = int(gauss_dimension_filter)
                 gauss_standard_deviation = float(gauss_standard_deviation)
                 k = float(k)
-                converted_matrix = high_boost(self.matrix, gauss_dimension_filter, gauss_standard_deviation, k)
+                self.converted_matrix.append(high_boost(self.matrix, gauss_dimension_filter, gauss_standard_deviation, k))
                 print("Pronto!")
-                self.apply_transformation(converted_matrix)
+                self.apply_transformation(self.converted_matrix[-1])
             except ValueError:
                 print("Os valores devem ser inteiro, float e float, respectivamente")
                 return
@@ -734,13 +756,13 @@ class MainWindow(QMainWindow):
 
             # Taking the raio value
             if (self.ui.sobel_apply_window_ui.radioButton.isChecked()):
-                converted_matrix = sobel(self.matrix, 'x')
+                self.converted_matrix.append(sobel(self.matrix, 'x'))
             elif (self.ui.sobel_apply_window_ui.radioButton_2.isChecked()):
-                converted_matrix = sobel(self.matrix, 'y')
+                self.converted_matrix.append(sobel(self.matrix, 'y'))
 
             # Applying the algorith result
             print("Pronto!")
-            self.apply_transformation(converted_matrix)
+            self.apply_transformation(self.converted_matrix[-1])
 
 
     # Magnitude gradient
@@ -749,9 +771,9 @@ class MainWindow(QMainWindow):
         self.active_button(self.ui.button_magnitude_gradient)
 
         # Applying the algorithm
-        converted_matrix = magnitude_gradient(self.matrix)
+        self.converted_matrix.append(magnitude_gradient(self.matrix))
         print("Pronto!")
-        self.apply_transformation(converted_matrix)
+        self.apply_transformation(self.converted_matrix[-1])
 
     # Geometric operations
     def open_scaling_apply(self):
@@ -771,9 +793,9 @@ class MainWindow(QMainWindow):
                 # Taking the values
                 sx = float(self.ui.scaling_apply_window_ui.lineEdit.text())
                 sy = float(self.ui.scaling_apply_window_ui.lineEdit_2.text())
-                converted_matrix = scaling(self.matrix, sx, sy, self.alg_type)
+                self.converted_matrix.append(scaling(self.matrix, sx, sy, self.alg_type))
                 print("Pronto!")
-                self.apply_transformation(converted_matrix)
+                self.apply_transformation(self.converted_matrix[-1])
 
             except ValueError as e:
                 print("Os valores de sx e sy devem ser floats!")
@@ -818,8 +840,8 @@ class MainWindow(QMainWindow):
         self.mask_image.fill(QColor(255, 255, 255))
 
         self.ui.fft_paint_window.show()
-        
-        self.apply_transformation(converted_matrix)
+
+        self.show_last_matrix(converted_matrix)
 
     # Apply fft
     def open_fft_apply(self):
@@ -842,16 +864,12 @@ class MainWindow(QMainWindow):
         self.ui.fft_paint_window.show()
         
         print("Pronto!")
-        self.apply_transformation(converted_matrix)
+        self.show_last_matrix(converted_matrix)
 
     # Inverse fourier
     def open_ifft_apply(self):
 
-        # First checks to go on with the code
-        condition1 = not hasattr(self, 'shifted_complex_matrix')
-        condition2 = not hasattr(self, 'mask_image')
-
-        if (condition1 or condition2 or self.mask_image is None):
+        if (not self.is_drawning_mask or self.mask_image is None):
             print("Não há nenhuma matriz fft para aplicar a inversa!")
             return
 
@@ -876,7 +894,7 @@ class MainWindow(QMainWindow):
         else:
             filtered_matrix = self.shifted_complex_matrix * mask_matrix
 
-        converted_matrix = inverse_fft(filtered_matrix)
+        self.converted_matrix.append(inverse_fft(filtered_matrix))
         print("Pronto!")
 
         # Removing padding
@@ -884,19 +902,19 @@ class MainWindow(QMainWindow):
         M = self.original_matrix_shape[1]
 
         if (len(self.original_matrix_shape) == 3):
-            converted_matrix = converted_matrix[:N, :M, :]
+            self.converted_matrix[-1] = self.converted_matrix[-1][:N, :M, :]
         else:
-            converted_matrix = converted_matrix[:N, :M]
+            self.converted_matrix[-1] = self.converted_matrix[-1][:N, :M]
 
         self.is_drawning_mask = False
-        self.apply_transformation(converted_matrix)
+        self.apply_transformation(self.converted_matrix[-1])
 
     # Colors algorithms
     def open_rgb_hsi(self):
 
         self.active_button(self.ui.button_get_hsi)
 
-        self.H, self.S, self.I = convert_rgb_to_hsi(self.matrix)
+        self.H, self.S, self.I = convert_rgb_to_hsi(self.converted_matrix[-1])
 
         images_data = [
             (self.H, "Canal H (Matiz)"),
@@ -934,9 +952,9 @@ class MainWindow(QMainWindow):
                 shift_i = float(shift_i)
 
                 self.H, self.S, self.I = adjust_hsi_channels_2(self.H, self.S, self.I, shift_h, shift_s, shift_i)
-                converted_matrix = convert_hsi_to_rgb(self.H, self.S, self.I)
+                self.converted_matrix.append(convert_hsi_to_rgb(self.H, self.S, self.I))
                 print("Pronto!")
-                self.apply_transformation(converted_matrix)
+                self.apply_transformation(self.converted_matrix[-1])
 
             except ValueError:
                 print("Os valores devem ser decimais!")
@@ -947,9 +965,9 @@ class MainWindow(QMainWindow):
         self.active_button(self.ui.button_grayscale_mean)
 
         # Applying the function
-        converted_matrix = gray_scale_mean(self.matrix)
+        self.converted_matrix.append(gray_scale_mean(self.matrix))
         print("Pronto!")
-        self.apply_transformation(converted_matrix)
+        self.apply_transformation(self.converted_matrix[-1])
 
     # Grayscale weighted mean filter
     def open_grayscale_weighted_apply(self):
@@ -976,9 +994,9 @@ class MainWindow(QMainWindow):
                 wred = float(wred)
                 wgreen = float(wgreen)
                 wblue = float(wblue)
-                converted_matrix = gray_scale_weigthted_arithmetic_mean(self.matrix, wred, wgreen, wblue)
+                self.converted_matrix.append(gray_scale_weigthted_arithmetic_mean(self.matrix, wred, wgreen, wblue))
                 print("Pronto!")
-                self.apply_transformation(converted_matrix)
+                self.apply_transformation(self.converted_matrix[-1])
             except ValueError:
                 print("Os valores devem ser numeros!")
 
@@ -995,14 +1013,14 @@ class MainWindow(QMainWindow):
             
             try:
                 L = float(L)
-                converted_matrix = rgb_negative(self.matrix, L)
-                self.apply_transformation(converted_matrix)
+                self.converted_matrix.append(rgb_negative(self.matrix, L))
+                self.apply_transformation(self.converted_matrix[-1])
             except ValueError:
                 if (L.strip() != ""):
                     print("O valor deve ser um número")
                     return
-                converted_matrix = rgb_negative(self.matrix)
-                self.apply_transformation(converted_matrix)
+                self.converted_matrix.append(rgb_negative(self.matrix))
+                self.apply_transformation(self.converted_matrix[-1])
 
     # Chroma key
     def open_chroma_key(self):
@@ -1027,9 +1045,9 @@ class MainWindow(QMainWindow):
 
                 if (back_image_path):
                     back_image = conversion_to_matrix(back_image_path)
-                    converted_matrix = chroma_key(self.matrix, back_image, color_vector = [r, g, b], tol = tol)
+                    self.converted_matrix.append(chroma_key(self.matrix, back_image, color_vector = [r, g, b], tol = tol))
                     print("Pronto!")
-                    self.apply_transformation(converted_matrix)         
+                    self.apply_transformation(self.converted_matrix[-1])         
 
             except ValueError:
                 print("Os valores devem ser int, int, int e float, respectivamente!")
@@ -1059,9 +1077,9 @@ class MainWindow(QMainWindow):
                 shift_s = float(shift_s)
                 shift_i = float(shift_i)
 
-                converted_matrix = adjust_hsi_channels(self.matrix, shift_h, shift_s, shift_i)
+                self.converted_matrix.append(adjust_hsi_channels(self.matrix, shift_h, shift_s, shift_i))
                 print("Pronto!")
-                self.apply_transformation(converted_matrix)
+                self.apply_transformation(self.converted_matrix[-1])
 
             except ValueError:
                 print("Os valores devem ser números!")
@@ -1071,9 +1089,9 @@ class MainWindow(QMainWindow):
         self.active_button(self.ui.button_sepia_filter)
 
         # Applying sepia filter
-        converted_matrix = sepia_rgb(self.matrix)
+        self.converted_matrix.append(sepia_rgb(self.matrix))
         print("Pronto!")
-        self.apply_transformation(converted_matrix)
+        self.apply_transformation(self.converted_matrix[-1])
 
     # Adjust color balance
     def open_adjust_color_balance_apply(self):
@@ -1100,9 +1118,9 @@ class MainWindow(QMainWindow):
                 shift_mg = float(shift_mg)
                 shift_yb = float(shift_yb)
 
-                converted_matrix = adjust_color_balance(self.matrix, shift_cr, shift_mg, shift_yb)
+                self.converted_matrix.append(adjust_color_balance(self.matrix, shift_cr, shift_mg, shift_yb))
                 print("Pronto!")
-                self.apply_transformation(converted_matrix)
+                self.apply_transformation(self.converted_matrix[-1])
 
             except ValueError:
                 print("Os valores devem ser números!")
@@ -1114,7 +1132,7 @@ class MainWindow(QMainWindow):
             label = self.ui.ui_pages.label_2
             pixmap = label.pixmap()
 
-            if (pixmap is None or not hasattr(self, 'matrix')):
+            if (pixmap is None or self.matrix is None):
                 return
 
             original_height, original_width = self.matrix.shape[:2]
@@ -1134,8 +1152,8 @@ class MainWindow(QMainWindow):
                 pixel_value = self.matrix[original_y, original_x]
 
                 if self.waiting_for_rotation_click:
-                    converted_matrix = rotation(self.matrix, self.rotation_angle, original_x, original_y, self.alg_type)
-                    self.apply_transformation(converted_matrix)
+                    self.converted_matrix.append(rotation(self.matrix, self.rotation_angle, original_x, original_y, self.alg_type))
+                    self.apply_transformation(self.converted_matrix[-1])
                     self.waiting_for_rotation_click = False
                     self.ui.ui_pages.label_2.unsetCursor()
 
@@ -1246,6 +1264,20 @@ class MainWindow(QMainWindow):
     def update_mirror(self, state):
         self.mirror_brush = (state != 0)
 
+    @property
+    def matrix(self):
+
+        # The matrix in the program is the last element in the converted_matrix list
+        if (len(self.converted_matrix) > 0):
+            return self.converted_matrix[-1]
+        return None
+    
+    def undo_operation(self):
+        if (len(self.converted_matrix) > 1):
+            self.is_drawning_mask = False
+            self.ui.fft_paint_window.hide()
+            self.converted_matrix.pop()
+            self.show_last_matrix(self.matrix)
 
 # main
 def main():

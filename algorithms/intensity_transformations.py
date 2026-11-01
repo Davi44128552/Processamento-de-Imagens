@@ -217,14 +217,16 @@ def steganography_apply(img_matrix: np.ndarray, message: str) -> np.ndarray:
     
     # Steganography involves converting a message into binary and adding it to the least significant bit (LSB) of the image
 
+    if (img_matrix.ndim == 2):
+        img_matrix = np.dstack((img_matrix, img_matrix, img_matrix))
+
     # Adding a terminator to the message (this will be important for decode)
-    message += '\x00'
+    message_bytes = message.encode('utf-8') + b'\x00'
 
     # Converting the string message into binary
     binary_list = []
-    for char in message:
-        ascii_code = ord(char)
-        binary_code = format(ascii_code, '08b')
+    for char in message_bytes:
+        binary_code = format(char, '08b')
 
         for bit in binary_code:
             binary_list.append(int(bit))
@@ -253,10 +255,10 @@ def steganography_apply(img_matrix: np.ndarray, message: str) -> np.ndarray:
 def steganography_decoder(img_matrix: np.ndarray) -> str:
 
     # In this function, we will take the LSB from the image and try to find the message
-    message = ""
 
     # Converting the matrix into 1D (again)
     img_oned = img_matrix.flatten()
+    message = bytearray()
 
     # Extracting the LSB from the image
     matrix_lsb = img_oned & 1
@@ -276,7 +278,7 @@ def steganography_decoder(img_matrix: np.ndarray) -> str:
             break
 
         # Otherwise, we add the string to the message
-        message += chr(ascii_char)
+        message.append(ascii_char)
 
     # Returning the final message
-    return message
+    return message.decode('utf-8', errors = 'ignore')
