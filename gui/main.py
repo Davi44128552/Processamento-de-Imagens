@@ -400,7 +400,7 @@ class MainWindow(QMainWindow):
 
             try:
                 T = int(T)
-                self.converted_matrix.append(thresholding(self.matrix, T))
+                self.converted_matrix.append(thresholding(self.converted_matrix[-1], T))
                 self.apply_transformation(self.converted_matrix[-1])
             except ValueError:
                 print("O valor deve ser inteiro")
