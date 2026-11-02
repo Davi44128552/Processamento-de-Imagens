@@ -24,18 +24,24 @@ def discrete_fourier_transform(img_matrix: np.ndarray) -> tuple[np.ndarray, np.n
     N = img_matrix.shape[0]
     M = img_matrix.shape[1]
 
+    # Padding the matrix (to inverse fourier)
+    new_N = next_power_of_two(N)
+    new_M = next_power_of_two(M)
+    padded_image = np.zeros((new_N, new_M), dtype = np.float64)
+    padded_image[:N, :M] = input_matrix
+
     # Creating the rows matrix
-    n = np.arange(N)
-    k = n.reshape((N, 1))
-    weight_rows = np.exp((-2j * np.pi * k * n) / N)
+    n = np.arange(new_N)
+    k = n.reshape((new_N, 1))
+    weight_rows = np.exp((-2j * np.pi * ((k * n) % new_N)) / new_N)
 
     # Creating the columns matrix
-    n = np.arange(M)
-    k = n.reshape((M, 1))
-    weight_columns = np.exp((-2j * np.pi * n * k) / M)
+    n = np.arange(new_M)
+    k = n.reshape((new_M, 1))
+    weight_columns = np.exp((-2j * np.pi * ((n * k) % new_M)) / new_M)
 
     # Calculating discrete fourier transform using the formula
-    result_matrices = weight_rows @ input_matrix @ weight_columns
+    result_matrices = weight_rows @ padded_image @ weight_columns
 
     # Taking the result matrices
     real_matrix = result_matrices.real
