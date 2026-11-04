@@ -232,7 +232,6 @@ class UI_MainWindow(object):
         self.button_get_rgb = PyPushButton(text = "Converter HSI para RGB", icon_path = "convert.svg")
         self.button_grayscale_mean = PyPushButton(text = "Escala de cinza pela média", icon_path = "grayscale_mean.svg")
         self.button_grayscale_weighted_mean = PyPushButton(text = "Escala de cinza por média ponderada", icon_path = "grayscale_weighted_mean.svg")
-        self.button_rgb_negative = PyPushButton(text = "Negativa RGB", icon_path = "rgb_negative.svg")
         self.button_chroma_key = PyPushButton(text = "Chroma Key", icon_path = "chroma_key.svg")
         self.button_adjust_hsi = PyPushButton(text = "Ajustar canais HSI", icon_path = "grayscale_weighted_mean.svg")
         self.button_adjust_color_balance = PyPushButton(text = "Ajustar balancemanto de cores", icon_path = "grayscale_weighted_mean.svg")
@@ -297,7 +296,6 @@ class UI_MainWindow(object):
         self.colors_algorithms_menu_layout.addWidget(self.button_get_rgb)
         self.colors_algorithms_menu_layout.addWidget(self.button_grayscale_mean)
         self.colors_algorithms_menu_layout.addWidget(self.button_grayscale_weighted_mean)
-        self.colors_algorithms_menu_layout.addWidget(self.button_rgb_negative)
         self.colors_algorithms_menu_layout.addWidget(self.button_chroma_key)
         self.colors_algorithms_menu_layout.addWidget(self.button_adjust_hsi)
         self.colors_algorithms_menu_layout.addWidget(self.button_adjust_color_balance)
@@ -592,15 +590,6 @@ class UI_MainWindow(object):
         self.grayscale_weighted_mean_apply_window.setStyleSheet("background-color: #44475a; font: 700 11pt 'Segoe UI'; color: white")
         self.grayscale_weighted_mean_apply_window.setWindowIcon(QPixmap(os.path.normpath(os.path.join(path, "grayscale_weighted_mean.svg"))))
         self.grayscale_weighted_mean_apply_window.setWindowTitle("Escala de Cinza pela média ponderada")
-
-        # Color negative
-        self.negative_color_window = QDialog()
-        self.negative_color_window_ui = one_input.Ui_Dialog()
-        self.negative_color_window_ui.setupUi(self.negative_color_window)
-        self.negative_color_window_ui.retranslateUi(self.negative_color_window, "Escreva um valor para L", "")
-        self.negative_color_window.setStyleSheet("background-color: #44475a; font: 700 11pt 'Segoe UI'; color: white")
-        self.negative_color_window.setWindowIcon(QPixmap(os.path.normpath(os.path.join(path, "rgb_negative.svg"))))
-        self.negative_color_window.setWindowTitle("Negativa RGB")
 
         # Chroma key
         self.chroma_key_window = QDialog()
