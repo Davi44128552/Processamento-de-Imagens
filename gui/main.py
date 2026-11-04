@@ -102,7 +102,6 @@ class MainWindow(QMainWindow):
         self.ui.button_get_rgb.clicked.connect(self.open_hsi_rgb)
         self.ui.button_grayscale_mean.clicked.connect(self.open_grayscale_mean_color_apply)
         self.ui.button_grayscale_weighted_mean.clicked.connect(self.open_grayscale_weighted_apply)
-        self.ui.button_rgb_negative.clicked.connect(self.open_negative_rgb)
         self.ui.button_chroma_key.clicked.connect(self.open_chroma_key)
         self.ui.button_adjust_hsi.clicked.connect(self.open_adjust_hsi_channels_apply)
         self.ui.button_adjust_color_balance.clicked.connect(self.open_adjust_color_balance_apply)
@@ -411,22 +410,10 @@ class MainWindow(QMainWindow):
 
         self.active_button(self.ui.button_negative)
 
-        # Executing the negative dialog
-        if (self.ui.negative_window.exec()):
-
-            # Taking the value
-            L = self.ui.negative_window_ui.lineEdit.text()
-            
-            try:
-                L = float(L)
-                self.converted_matrix.append(negative(self.matrix, L))
-                self.apply_transformation(self.converted_matrix[-1])
-            except ValueError:
-                if (L.strip() != ""):
-                    print("O valor deve ser um número")
-                    return
-                self.converted_matrix.append(negative(self.matrix))
-                self.apply_transformation(self.converted_matrix[-1])
+        # Applying the algorithm 
+        self.converted_matrix.append(negative(self.matrix))
+        self.apply_transformation(self.converted_matrix[-1])
+        self.apply_transformation(self.converted_matrix[-1])
 
     # Brightness
     def open_brightness(self):
@@ -999,28 +986,6 @@ class MainWindow(QMainWindow):
                 self.apply_transformation(self.converted_matrix[-1])
             except ValueError:
                 print("Os valores devem ser numeros!")
-
-    # Negative
-    def open_negative_rgb(self):
-
-        self.active_button(self.ui.button_rgb_negative)
-
-        # Executing the negative dialog
-        if (self.ui.negative_color_window.exec()):
-
-            # Taking the value
-            L = self.ui.negative_color_window_ui.lineEdit.text()
-            
-            try:
-                L = float(L)
-                self.converted_matrix.append(rgb_negative(self.matrix, L))
-                self.apply_transformation(self.converted_matrix[-1])
-            except ValueError:
-                if (L.strip() != ""):
-                    print("O valor deve ser um número")
-                    return
-                self.converted_matrix.append(rgb_negative(self.matrix))
-                self.apply_transformation(self.converted_matrix[-1])
 
     # Chroma key
     def open_chroma_key(self):

@@ -128,30 +128,6 @@ def gray_scale_weigthted_arithmetic_mean(img_matrix: np.ndarray, wred: float = 0
     # Returning the result
     return final_matrix.astype(np.uint8)
 
-# Negative Function
-def rgb_negative(img_matrix: np.ndarray, L = None) -> np.ndarray:
-
-    # Initial parameters
-    input_matrix = img_matrix.astype(np.float64)
-    R = input_matrix[:, :, 0]
-    G = input_matrix[:, :, 1]
-    B = input_matrix[:, :, 2]
-
-    # The logic is similar to the negative applied before, but now we will perform the calculation for each RGB channel.
-    if L is None:
-        L = 2 ** (img_matrix.itemsize * 8) # if uint8, itemsize = 1; if uint16, itemsize = ; ...
-
-    # Applying the formula L - 1 - img_matrix
-    R_negative = L - 1 - R
-    G_negative = L - 1 - G
-    B_negative = L - 1 - B
-
-    # Merging the matrices
-    final_matrix = np.dstack((R_negative, G_negative, B_negative))
-
-    # Returning the result
-    return final_matrix.astype(np.uint8)
-
 # Chroma-Key function
 def chroma_key(img_matrix: np.ndarray, background_img_matrix: np.ndarray, color_vector: list, tol: float) -> np.ndarray:
     

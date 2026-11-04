@@ -20,6 +20,7 @@ def thresholding(img_matrix: np.ndarray, T: int = 128) -> np.ndarray:
     return final_matrix.astype(np.uint8)
 
 # Negative
+@runs_rgb
 def negative(img_matrix: np.ndarray, L = None) -> np.ndarray:
 
     # Defining the value of L
