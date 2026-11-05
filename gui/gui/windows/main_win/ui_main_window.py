@@ -423,8 +423,9 @@ class UI_MainWindow(object):
         self.power_law_window.setWindowTitle("Transformação Gamma")
 
         self.intensity_level_slicing_window = QDialog()
-        self.intensity_level_slicing_window_ui = three_input.Ui_Dialog()
+        self.intensity_level_slicing_window_ui = scaling_dialog.Ui_Dialog()
         self.intensity_level_slicing_window_ui.setupUi(self.intensity_level_slicing_window)
+        self.intensity_level_slicing_window_ui.retranslateUi(self.intensity_level_slicing_window, label1 = u"Valor mínimo", label2 = u"Valor máximo", alg1 = u"Binary", alg2 = u"Preserve")
         self.intensity_level_slicing_window.setStyleSheet("background-color: #44475a; font: 700 10pt 'Segoe UI'; color: white")
         self.intensity_level_slicing_window.setWindowIcon(QPixmap(os.path.normpath(os.path.join(path, "icon7.svg"))))
         self.intensity_level_slicing_window.setWindowTitle("Transformação por nível de intensidade")

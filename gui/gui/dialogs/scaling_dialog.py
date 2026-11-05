@@ -1,22 +1,4 @@
-# -*- coding: utf-8 -*-
-
-################################################################################
-## Form generated from reading UI file 'designerAVFNVn.ui'
-##
-## Created by: Qt User Interface Compiler version 6.11.1
-##
-## WARNING! All changes made in this file will be lost when recompiling UI file!
-################################################################################
-
-from PySide6.QtCore import (QCoreApplication, QDate, QDateTime, QLocale,
-    QMetaObject, QObject, QPoint, QRect,
-    QSize, QTime, QUrl, Qt)
-from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
-    QFont, QFontDatabase, QGradient, QIcon,
-    QImage, QKeySequence, QLinearGradient, QPainter,
-    QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QApplication, QDialog, QLabel, QLineEdit,
-    QPushButton, QRadioButton, QSizePolicy, QWidget)
+from qt_core import *
 
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
@@ -25,20 +7,20 @@ class Ui_Dialog(object):
         Dialog.resize(383, 249)
         self.lineEdit = QLineEdit(Dialog)
         self.lineEdit.setObjectName(u"lineEdit")
-        self.lineEdit.setGeometry(QRect(70, 20, 161, 31))
+        self.lineEdit.setGeometry(QRect(170, 20, 161, 31))
         self.label = QLabel(Dialog)
         self.label.setObjectName(u"label")
-        self.label.setGeometry(QRect(30, 20, 21, 31))
+        self.label.setGeometry(QRect(30, 20, 130, 31))
         font = QFont()
         font.setPointSize(14)
         self.label.setFont(font)
         self.label_2 = QLabel(Dialog)
         self.label_2.setObjectName(u"label_2")
-        self.label_2.setGeometry(QRect(30, 80, 21, 31))
+        self.label_2.setGeometry(QRect(30, 80, 130, 31))
         self.label_2.setFont(font)
         self.lineEdit_2 = QLineEdit(Dialog)
         self.lineEdit_2.setObjectName(u"lineEdit_2")
-        self.lineEdit_2.setGeometry(QRect(70, 80, 161, 31))
+        self.lineEdit_2.setGeometry(QRect(170, 80, 161, 31))
         self.label_3 = QLabel(Dialog)
         self.label_3.setObjectName(u"label_3")
         self.label_3.setGeometry(QRect(30, 130, 161, 31))
@@ -60,13 +42,13 @@ class Ui_Dialog(object):
         QMetaObject.connectSlotsByName(Dialog)
     # setupUi
 
-    def retranslateUi(self, Dialog):
+    def retranslateUi(self, Dialog, label1 = u"Sx", label2 = u"Sy", alg1 = u"Nearest", alg2 = u"Bilinear"):
         Dialog.setWindowTitle(QCoreApplication.translate("Dialog", u"Dialog", None))
-        self.label.setText(QCoreApplication.translate("Dialog", u"Sx", None))
-        self.label_2.setText(QCoreApplication.translate("Dialog", u"Sy", None))
+        self.label.setText(QCoreApplication.translate("Dialog", label1, None))
+        self.label_2.setText(QCoreApplication.translate("Dialog", label2, None))
         self.label_3.setText(QCoreApplication.translate("Dialog", u"Tipo de Algoritmo:", None))
-        self.radioButton.setText(QCoreApplication.translate("Dialog", u"Nearest", None))
-        self.radioButton_2.setText(QCoreApplication.translate("Dialog", u"Bilinear", None))
+        self.radioButton.setText(QCoreApplication.translate("Dialog", alg1, None))
+        self.radioButton_2.setText(QCoreApplication.translate("Dialog", alg2, None))
         self.pushButton.setText(QCoreApplication.translate("Dialog", u"Confirmar", None))
     # retranslateUi
 
