@@ -4,7 +4,7 @@ from qt_core import *
 class Canvas(QWidget):
 
     # Class variables
-    margin = 20
+    margin = 45
     click_tolerance = 8
 
     # Constructor
@@ -33,7 +33,36 @@ class Canvas(QWidget):
     def paintEvent(self, event):
 
         painter = QPainter(self)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         painter.fillRect(self.rect(), QColor(255, 255, 255))
+        painter.setPen(QPen(QColor(50, 50, 50)))
+        font = painter.font()
+        font.setPointSize(8)
+        painter.setFont(font)
+        ticks = [0, 64, 128, 192, 255]
+
+        # X values
+        for value in ticks:
+            p = self.widget((value, 0))
+            painter.drawLine(p.x(), p.y(), p.x(), p.y() + 5)
+            painter.drawText(p.x() - 20, p.y() + 20, str(value))
+
+        # Y values
+        for value in ticks:
+            p = self.widget((0, value))
+            painter.drawLine(p.x() - 5, p.y(), p.x(), p.y())
+            painter.drawText(p.x() - 25, p.y() + 4, str(value))
+
+        # Setting the axes titles
+        font.setPointSize(10)
+        font.setBold(True)
+        painter.setFont(font)
+        painter.drawText(self.margin + 100, self.margin + 255 + 35, "Entrada (r)")
+        painter.save()
+        painter.translate(15, self.margin + 160)
+        painter.rotate(-90)
+        painter.drawText(0, 0, "Saída (s)")
+        painter.restore()
         painter.setPen(QPen(QColor(200, 200, 200), 2))
         painter.drawRect(self.margin, self.margin, 255, 255)
         painter.drawLine(self.widget((0, 0)), self.widget((255, 255)))

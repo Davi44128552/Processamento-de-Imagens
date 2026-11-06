@@ -214,7 +214,8 @@ class UI_MainWindow(object):
         # Geometric operations buttons
         self.toggle_geometric_button = PyPushButton(text = "Menu", icon_path = "icon_menu.svg")
         self.scaling_button = PyPushButton(text = "Aplicar Escala", icon_path = "scale.svg")
-        self.rotating_button = PyPushButton(text = "Aplicar Rotação", icon_path = "rotate.svg")
+        self.rotating_without_pivot_button = PyPushButton(text = "Aplicar Rotação Simples", icon_path = "rotate.svg")
+        self.rotating_button = PyPushButton(text = "Aplicar Rotação com Pivô", icon_path = "rotate.svg")
         self.button_geometric_go_back = PyPushButton(text = "Voltar", icon_path = "arrow.svg")
         self.geometric_download_button = PyPushButton(text = "Baixar Imagem", icon_path = "download.svg")
 
@@ -278,6 +279,7 @@ class UI_MainWindow(object):
 
         self.geometric_operations_menu_layout.addWidget(self.toggle_geometric_button)
         self.geometric_operations_menu_layout.addWidget(self.scaling_button)
+        self.geometric_operations_menu_layout.addWidget(self.rotating_without_pivot_button)
         self.geometric_operations_menu_layout.addWidget(self.rotating_button)
         self.geometric_operations_menu_layout.addWidget(self.geometric_download_button)
         self.geometric_operations_menu_layout.addWidget(self.button_geometric_go_back)
@@ -533,13 +535,21 @@ class UI_MainWindow(object):
         self.scaling_apply_window.setWindowIcon(QPixmap(os.path.normpath(os.path.join(path, "scale.svg"))))
         self.scaling_apply_window.setWindowTitle("Escala")
 
+        # Simple rotating
+        self.rotating_without_pivot_window = QDialog()
+        self.rotating_without_pivot_window_ui = rotating_dialog.Ui_Dialog()
+        self.rotating_without_pivot_window_ui.setupUi(self.rotating_without_pivot_window)
+        self.rotating_without_pivot_window.setStyleSheet("background-color: #44475a; font: 700 11pt 'Segoe UI'; color: white")
+        self.rotating_without_pivot_window.setWindowIcon(QPixmap(os.path.normpath(os.path.join(path, "rotate.svg"))))
+        self.rotating_without_pivot_window.setWindowTitle("Rotação Simples")
+
         # Rotating
         self.rotating_apply_window = QDialog()
         self.rotating_apply_window_ui = rotating_dialog.Ui_Dialog()
         self.rotating_apply_window_ui.setupUi(self.rotating_apply_window)
         self.rotating_apply_window.setStyleSheet("background-color: #44475a; font: 700 11pt 'Segoe UI'; color: white")
         self.rotating_apply_window.setWindowIcon(QPixmap(os.path.normpath(os.path.join(path, "rotate.svg"))))
-        self.rotating_apply_window.setWindowTitle("Rotação")
+        self.rotating_apply_window.setWindowTitle("Rotação com pivô")
 
         # Frequency domain windows
         # DFT

@@ -55,7 +55,7 @@ class MainWindow(QMainWindow):
         self.ui.button_brightness.clicked.connect(self.open_brightness)
         self.ui.button_logarithm_transformation.clicked.connect(self.open_logarithm)
         self.ui.button_power_law.clicked.connect(self.open_power_law)
-        self.ui.button_piecewise_linear.clicked.connect(self.opne_piecewise_linear)
+        self.ui.button_piecewise_linear.clicked.connect(self.open_piecewise_linear)
         self.ui.button_contrast_stretching.clicked.connect(self.open_contrast_stretching)
         self.ui.button_intensity_level_slicing.clicked.connect(self.open_intensity_level_slicing)
         self.ui.button_bit_plane_slicing.clicked.connect(self.open_bit_plane_slicing)
@@ -83,10 +83,10 @@ class MainWindow(QMainWindow):
         # Geometric operations buttons
         self.ui.toggle_geometric_button.clicked.connect(lambda: self.toggle_button(self.ui.geometric_operations_menu))
         self.ui.scaling_button.clicked.connect(self.open_scaling_apply)
+        self.ui.rotating_without_pivot_button.clicked.connect(self.open_rotating_without_pivot)
+        self.ui.rotating_button.clicked.connect(self.open_rotating_apply)
         self.ui.geometric_download_button.clicked.connect(self.save_image)
         self.ui.button_geometric_go_back.clicked.connect(self.go_back)
-
-        self.ui.rotating_button.clicked.connect(self.open_rotating_apply)
         
         # Frequency domain buttons
         self.ui.toggle_frequency_button.clicked.connect(lambda: self.toggle_button(self.ui.frequency_algorithms_menu))
@@ -143,7 +143,7 @@ class MainWindow(QMainWindow):
                                        self.ui.button_steganography_apply, self.ui.button_steganography_undo, self.ui.config_button, self.ui.toggle_button, self.ui.toggle_button2, 
                                        self.ui.toggle_button3, self.ui.button_convolution, self.ui.button_mean, self.ui.button_gaussian, 
                                        self.ui.button_median, self.ui.button_laplacian, self.ui.button_highboost, self.ui.button_piecewise_linear,
-                                       self.ui.button_sobel, self.ui.button_magnitude_gradient, self.ui.toggle_spatial_button]
+                                       self.ui.button_sobel, self.ui.button_magnitude_gradient, self.ui.toggle_spatial_button, self.ui.rotating_without_pivot_button]
 
         self.waiting_for_rotation_click = False
         self.rotation_angle = 0
@@ -476,7 +476,7 @@ class MainWindow(QMainWindow):
                 return
 
     # Piecewise linear
-    def opne_piecewise_linear(self):
+    def open_piecewise_linear(self):
 
         self.active_button(self.ui.button_piecewise_linear)
 
@@ -786,6 +786,30 @@ class MainWindow(QMainWindow):
 
             except ValueError as e:
                 print("Os valores de sx e sy devem ser floats!")
+
+    # Rotating without pivot
+    def open_rotating_without_pivot(self):
+
+        self.active_button(self.ui.rotating_without_pivot_button)
+
+        # Executing the window
+        if (self.ui.rotating_without_pivot_window.exec()):
+
+            T = self.ui.rotating_without_pivot_window_ui.lineEdit.text()
+
+            try:
+                rotation_angle = float(T)
+
+                if (self.ui.rotating_without_pivot_window_ui.radioButton.isChecked()):
+                    alg_type = 'nearest'
+                elif (self.ui.rotating_without_pivot_window_ui.radioButton_2.isChecked()):
+                    alg_type = 'bilinear'
+
+                self.converted_matrix.append(rotation_without_pivot(self.matrix, rotation_angle, alg_type))
+                self.apply_transformation(self.converted_matrix[-1])
+
+            except ValueError as e:
+                print("O valor do ângulo deve ser float!")
 
     # Rotating
     def open_rotating_apply(self):
