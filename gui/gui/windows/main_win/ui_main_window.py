@@ -514,7 +514,7 @@ class UI_MainWindow(object):
         self.high_boost_filter_apply_window_ui.setupUi(self.high_boost_filter_apply_window)
         self.high_boost_filter_apply_window_ui.retranslateUi(self.high_boost_filter_apply_window, "Dimensão do filtro gaussiano", "Desvio padrão do filtro de gauss", "Fator de amplificação")
         self.high_boost_filter_apply_window.setStyleSheet("background-color: #44475a; font: 700 11pt 'Segoe UI'; color: white")
-        self.high_boost_filter_apply_window.setWindowIcon(QPixmap(os.path.normpath(os.path.join(path, "highboots.svg"))))
+        self.high_boost_filter_apply_window.setWindowIcon(QPixmap(os.path.normpath(os.path.join(path, "highboost.svg"))))
         self.high_boost_filter_apply_window.setWindowTitle("Filtro High-boost")
 
         # Sobel
@@ -523,7 +523,7 @@ class UI_MainWindow(object):
         self.sobel_apply_window_ui.setupUi(self.sobel_apply_window)
         self.sobel_apply_window_ui.retranslateUi(self.sobel_apply_window, "Sx", "Sy")
         self.sobel_apply_window.setStyleSheet("background-color: #44475a; font: 700 11pt 'Segoe UI'; color: white")
-        self.sobel_apply_window.setWindowIcon(QPixmap(os.path.normpath(os.path.join(path, ""))))
+        self.sobel_apply_window.setWindowIcon(QPixmap(os.path.normpath(os.path.join(path, "sobel.svg"))))
         self.sobel_apply_window.setWindowTitle("Sobel")
 
         # Geometric operations windows
@@ -623,7 +623,7 @@ class UI_MainWindow(object):
         self.adjust_color_balance_window = QDialog()
         self.adjust_color_balance_window_ui = three_input.Ui_Dialog()
         self.adjust_color_balance_window_ui.setupUi(self.adjust_color_balance_window)
-        self.adjust_color_balance_window_ui.retranslateUi(self.grayscale_weighted_mean_apply_window, "Deslocamento CR", "Deslocamento MG", "Deslocamento YB")
+        self.adjust_color_balance_window_ui.retranslateUi(self.adjust_color_balance_window, "Deslocamento CR", "Deslocamento MG", "Deslocamento YB")
         self.adjust_color_balance_window.setStyleSheet("background-color: #44475a; font: 700 11pt 'Segoe UI'; color: white")
         self.adjust_color_balance_window.setWindowIcon(QPixmap(os.path.normpath(os.path.join(path, "grayscale_weighted_mean.svg"))))
         self.adjust_color_balance_window.setWindowTitle("Aplicar ajuste de cores")
