@@ -137,6 +137,7 @@ class MainWindow(QMainWindow):
         self.ui.ui_pages.label_2.mousePressEvent = self.label_mouse_press
         self.ui.ui_pages.label_2.mouseMoveEvent = self.label_mouse_move
         self.ui.ui_pages.label_2.mouseReleaseEvent = self.label_mouse_release
+        self.ui.intensity_level_slicing_window_ui.pushButton.clicked.connect(self.ui.intensity_level_slicing_window.accept)
 
         self.button_list = [self.ui.button_thresholding, self.ui.button_negative, self.ui.button_brightness, self.ui.button_logarithm_transformation, self.ui.button_power_law,
                                        self.ui.button_contrast_stretching, self.ui.button_intensity_level_slicing, self.ui.button_bit_plane_slicing,
@@ -509,8 +510,12 @@ class MainWindow(QMainWindow):
         if (self.ui.intensity_level_slicing_window.exec()):
 
             min_value = self.ui.intensity_level_slicing_window_ui.lineEdit.text()
-            max_value = self.ui.intensity_level_slicing_window_ui.lineEdit_3.text()
-            algorithm = self.ui.intensity_level_slicing_window_ui.lineEdit_2.text().strip().lower()
+            max_value = self.ui.intensity_level_slicing_window_ui.lineEdit_2.text()
+
+            if (self.ui.intensity_level_slicing_window_ui.radioButton.isChecked()):
+                algorithm = 'binary'
+            elif (self.ui.intensity_level_slicing_window_ui.radioButton_2.isChecked()):
+                algorithm = 'preserve'
 
             try:
                 min_value = int(min_value)
