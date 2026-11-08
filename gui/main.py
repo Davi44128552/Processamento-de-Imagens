@@ -214,9 +214,22 @@ class MainWindow(QMainWindow):
         self.animation.setEasingCurve(QEasingCurve.InOutCirc)
         self.animation.start()
 
+    # Function to convert to RGB images
+    def standardize_to_rgb(self, matrix):
+        if (matrix.ndim == 2):
+            matrix = np.dstack((matrix, matrix, matrix))
+
+        elif (matrix.shape[2] == 2):
+            matrix = np.dstack((matrix[:, :, 0], matrix[:, :, 0], matrix[:, :, 0]))
+
+        elif (matrix.shape[2] == 4):
+            matrix = matrix[:, :, :3]
+
+        return matrix.astype(np.uint8)
+
     # Load imagem
     def load_image(self, file_path):
-        self.converted_matrix = [conversion_to_matrix(file_path)]
+        self.converted_matrix = [self.standardize_to_rgb(conversion_to_matrix(file_path))]
         self.is_drawning_mask = False
         self.show_last_matrix(self.matrix)
 
