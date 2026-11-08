@@ -61,7 +61,7 @@ def mean_filter(img_matrix: np.ndarray, dimension: int) -> np.ndarray:
 
 # Gaussian Smoothing
 @runs_rgb
-def gaussian_smoothing(img_matrix: np.ndarray, dimension: int, standard_deviation: float) -> np.ndarray:
+def gaussian_smoothing(img_matrix: np.ndarray, dimension: int, standard_deviation: float, float_result: bool = False) -> np.ndarray:
 
     # Checking if the dimension is valid
     if (dimension % 2 == 0):
@@ -94,6 +94,9 @@ def gaussian_smoothing(img_matrix: np.ndarray, dimension: int, standard_deviatio
 
     # Applying the filter
     final_matrix = convolution(img_matrix, gauss_filter)
+
+    if (float_result):
+        return final_matrix
 
     # Returning the final matrix
     return final_matrix.astype(np.uint8)
@@ -142,7 +145,7 @@ def laplacian(img_matrix: np.ndarray, kernel: int, dimension_log: int, standard_
 
     # If LoG is true, we apply 
     if (log):
-        img_matrix_input = gaussian_smoothing(img_matrix, dimension_log, standard_deviation_log)
+        img_matrix_input = gaussian_smoothing(img_matrix, dimension_log, standard_deviation_log, True)
     else:
         img_matrix_input = img_matrix
 
@@ -180,8 +183,8 @@ def high_boost(img_matrix: np.ndarray, dimension_gauss: int, standard_deviation_
 
     # following the steps described in the book
     # 1. blur the image
-    # Using mean filter
-    blur_image = gaussian_smoothing(img_matrix, dimension_gauss, standard_deviation_gauss)
+    # Using gaussian filter
+    blur_image = gaussian_smoothing(img_matrix, dimension_gauss, standard_deviation_gauss, True)
 
     # 2. subtracting the blurred image from the original
     # Converting the matrix
