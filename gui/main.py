@@ -21,6 +21,8 @@ from gui.dialogs.dialog_convolution_matrix import ConvolutionMatrixDialog
 from gui.dialogs.dialog_hsi_result import HSIDialog
 from gui.dialogs.dialog_canvas import DialogCanvas
 
+DISPLAY_MARGIN = 10
+
 # Main window class
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -149,6 +151,13 @@ class MainWindow(QMainWindow):
         self.waiting_for_rotation_click = False
         self.rotation_angle = 0
         self.alg_type = 'bilinear'
+
+        label = self.ui.ui_pages.label_2
+        label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        label.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Ignored)
+        label.setMinimumSize(1, 1)
+        self.full_pixmap = None
+        self.ui.pages.installEventFilter(self)
 
         # Some config buttons behavior
     def help(self):
@@ -579,7 +588,8 @@ class MainWindow(QMainWindow):
 
     def show_last_matrix(self, matrix):
         self.final_image = QPixmap.fromImage(ImageQt(conversion_to_image(matrix)))
-        self.ui.ui_pages.label_2.setPixmap(self.resize_image_display(self.final_image))
+        self.full_pixmap = self.final_image
+        self.ui.ui_pages.label_2.setPixmap(self.resize_image_display(self.full_pixmap))
 
     def apply_transformation(self, converted_matrix: np.ndarray = None):
         last_matrix = self.converted_matrix[-1]
@@ -1167,8 +1177,12 @@ class MainWindow(QMainWindow):
     # Function to resize the image according to display  
     def resize_image_display(self, pixmap: QPixmap) -> QPixmap:
 
-        if (pixmap.width() > 700 or pixmap.height() > 700):
-            return pixmap.scaled(700, 700, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
+        area = self.ui.pages.size()
+        max_width = max(1, area.width() - DISPLAY_MARGIN)
+        max_height = max(1, area.height() - DISPLAY_MARGIN)
+
+        if (pixmap.width() > max_width or pixmap.height() > max_height):
+            return pixmap.scaled(max_width, max_height, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
         return pixmap
 
     def label_mouse_press(self, event):
@@ -1224,8 +1238,8 @@ class MainWindow(QMainWindow):
         original_height = self.mask_image.height()
 
         def map_point(p_pix):
-            cx = max(0, min(p_pix.x() - offset_x, disp_width - 1))
-            cy = max(0, min(p_pix.y() - offset_y, disp_height - 1))
+            cx = max(0, min(p_pix.x(), disp_width - 1))
+            cy = max(0, min(p_pix.y(), disp_height - 1))
             ox = int(cx * (original_width / disp_width))
             oy = int(cy * (original_height / disp_height))
             return QPoint(ox, oy)
@@ -1285,6 +1299,14 @@ class MainWindow(QMainWindow):
             self.ui.fft_paint_window.hide()
             self.converted_matrix.pop()
             self.show_last_matrix(self.matrix)
+
+    def eventFilter(self, object, event):
+        if (object is self.ui.pages and event.type() == QEvent.Type.Resize):
+
+            if (self.full_pixmap is not None and not self.is_drawning_mask):
+                self.ui.ui_pages.label_2.setPixmap(self.resize_image_display(self.full_pixmap))
+        
+        return super().eventFilter(object, event)
 
 # main
 def main():
